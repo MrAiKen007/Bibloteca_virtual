@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<header id="header" class="sticky-header"></header>
+<div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+<div class="mobile-nav-panel"><nav><a href="./catalogo.html">Catálogo</a><a href="./biblioteca.html">Minha Biblioteca</a></nav></div>
+</div>
+<main class="container py-10" id="main"></main>
+<footer id="footer"></footer>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+function render(){
+const user=currentUser;
+if(!user){location.href="./login.html";return;}
+const myOrders=orders.filter(o=>o.userId===user.id);
+document.getElementById("main").innerHTML=`<div><h1 class="font-display text-3xl font-bold mb-6">Perfil</h1><div class="grid lg-grid-cols-2" style="gap:1.5rem;"><div class="card card-p-5"><h3 class="mb-4 font-semibold">Dados pessoais</h3><div class="flex items-center gap-4"><img src="${user.avatar}" class="rounded-full" style="width:80px;height:80px;object-fit:cover;" onerror="this.style.display='none'" alt=""><button class="btn btn-sm btn-outline">Alterar foto</button></div><div class="mt-5 space-y-3"><div><label class="label">Nome</label><input class="input" id="p-name" value="${user.name}"></div><div><label class="label">E-mail</label><input class="input" type="email" id="p-email" value="${user.email}"></div><button class="btn" onclick="toast('Alterações guardadas')">Guardar Alterações</button></div></div><div class="card card-p-5"><h3 class="mb-4 font-semibold">Segurança</h3><div class="space-y-3"><div><label class="label">Palavra-passe atual</label><input type="password" class="input"></div><div><label class="label">Nova palavra-passe</label><input type="password" class="input"></div><div><label class="label">Confirmar nova palavra-passe</label><input type="password" class="input"></div><button class="btn" onclick="toast('Palavra-passe atualizada')">Atualizar palavra-passe</button></div></div></div><div class="card card-p-5 mt-6"><h3 class="mb-4 font-semibold">Histórico de pedidos</h3>${myOrders.length===0?`<p class="text-sm text-muted">Sem pedidos ainda.</p>`:`<table class="table"><thead><tr><th>Data</th><th>Livros</th><th>Valor</th><th>Estado</th></tr></thead><tbody>${myOrders.map(o=>`<tr><td>${formatDate(o.date)}</td><td>${o.items.map(i=>getBook(i.bookId)?.title).join(", ")}</td><td>${formatAOA(o.total)}</td><td><span class="badge ${o.status==="pago"?"badge-primary":""}">${o.status}</span></td></tr>`).join("")}</tbody></table>`}</div></div>`;
+}
+document.addEventListener("DOMContentLoaded",render);
+</script>
+</body>
+</html>

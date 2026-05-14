@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recuperar senha — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<div class="auth-page">
+<div class="card auth-card">
+<a href="./catalogo.html" class="block text-center font-display text-3xl font-bold tracking-wider">BIBLIO</a>
+<h1 class="mt-6 text-center text-2xl font-display">Recuperar senha</h1>
+<p class="mt-1 text-center text-sm text-muted">Introduza o seu email para receber instruções.</p>
+<form id="form" class="mt-6 space-y-4">
+<div><label class="label">E-mail</label><input type="email" class="input" required></div>
+<button type="submit" class="btn btn-w-full">Enviar</button>
+<p class="text-center text-sm text-muted"><a href="./login.html" class="text-primary" style="text-decoration:underline;">Voltar ao login</a></p>
+</form>
+</div>
+</div>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+document.getElementById("form").addEventListener("submit",function(e){e.preventDefault();toast("Email enviado! Verifique a sua caixa de entrada.");});
+</script>
+</body>
+</html>

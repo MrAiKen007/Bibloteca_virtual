@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utilizadores — Admin — BIBLIO</title>
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+<body>
+<div class="admin-layout">
+<aside class="sidebar">
+<div class="sidebar-header"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="sidebar-logo">BIBLIO</div><span class="text-xs uppercase text-muted">Admin</span></div>
+<nav class="sidebar-nav">
+<a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+<a href="./utilizadores.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Utilizadores</a>
+<a href="./relatorios.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg> Relatórios</a>
+</nav>
+<div class="sidebar-footer" id="sidebar-footer"></div>
+</aside>
+<main class="main-content"><div class="p-6" id="main"></div></main>
+</div>
+<script src="../../js/data.js"></script>
+<script src="../../js/app.js"></script>
+<script>
+function renderSidebar(){
+const el=document.getElementById("sidebar-footer");
+if(!el)return;
+el.innerHTML=`<div class="sidebar-user"><img src="${currentUser?.avatar||''}" class="sidebar-user-avatar" onerror="this.style.display='none'"><div><div class="text-xs font-medium truncate">${currentUser?.name||''}</div><div class="text-xs text-muted truncate">${currentUser?.email||''}</div></div></div><a href="../catalogo.html" class="sidebar-nav" style="padding:0.25rem 0.5rem;margin-bottom:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Voltar ao site</a><a href="#" class="sidebar-nav" style="padding:0.25rem 0.5rem;" onclick="handleLogout();return false;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Terminar sessão</a>`;
+}
+function render(){
+document.getElementById("main").innerHTML=`<div class="space-y-6"><div><h1 class="font-display text-3xl font-bold">Utilizadores</h1><p class="text-sm text-muted">Gestão de utilizadores da plataforma</p></div><div class="card p-0"><table class="table"><thead><tr><th>Foto</th><th>Nome</th><th>Email</th><th>Perfil</th><th>Estado</th><th class="text-right">Ações</th></tr></thead><tbody>${users.map(u=>`<tr><td><img src="${u.avatar}" class="rounded-full" style="width:36px;height:36px;object-fit:cover;" onerror="this.style.display='none'"></td><td class="font-medium">${u.name}</td><td>${u.email}</td><td><span class="badge badge-outline">${u.role}</span></td><td><span class="badge ${u.active?"badge-primary":""}">${u.active?"Ativo":"Inativo"}</span></td><td class="text-right"><button class="icon-btn" onclick="toast('Editar utilizador')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button></td></tr>`).join("")}</tbody></table></div></div>`;
+}
+document.addEventListener("DOMContentLoaded",()=>{renderSidebar();render();});
+</script>
+</body>
+</html>
