@@ -3,33 +3,191 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Relatórios — Admin — BIBLIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/styles.css">
+<style>
+  :root {
+    --ds-primary: #e84848; --ds-primary-hover: #c93535; --ds-primary-subtle: oklch(0.93 0.02 25);
+    --ds-bg: #f6f5f4; --ds-text: #1a1a1a; --ds-text-muted: #7a7a7a; --ds-border: #e5e3e0;
+    --ds-white: #ffffff; --ds-sidebar: #1a1a1a;
+    --ds-font-serif: 'Playfair Display', serif; --ds-font-sans: 'Inter', sans-serif;
+    --ds-green: oklch(0.62 0.14 145); --ds-green-subtle: oklch(0.94 0.025 145);
+    --ds-amber: oklch(0.78 0.14 75); --ds-amber-subtle: oklch(0.95 0.025 75);
+    --ds-blue: oklch(0.62 0.14 230); --ds-blue-subtle: oklch(0.94 0.025 230);
+  }
+  body { background: var(--ds-bg); color: var(--ds-text); font-family: var(--ds-font-sans); -webkit-font-smoothing: antialiased; }
+  .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--ds-sidebar); padding: 1.75rem 0.875rem; display: flex; flex-direction: column; color: var(--ds-sidebar-text); position: sticky; top: 0; height: 100vh; }
+  .sidebar-header { display: flex; align-items: center; gap: 0.625rem; padding: 0 0.75rem 2rem; }
+  .sidebar-logo { font-family: var(--ds-font-serif); font-weight: 700; letter-spacing: 0.06em; font-size: 1.125rem; color: #ffffff; }
+  .sidebar-nav a { display: flex; align-items: center; gap: 0.625rem; padding: 0.625rem 0.75rem; border-radius: 6px; color: #ffffff; font-weight: 500; text-decoration: none; transition: all 0.15s; margin-bottom: 0.125rem; font-size: 0.8125rem; }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #ffffff; }
+  .sidebar-nav a.active { background: rgba(232,72,72,0.12); color: var(--ds-primary); }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .main-content { padding: 2.5rem 3rem; max-width: 1200px; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: var(--ds-font-serif); font-size: 1.75rem; font-weight: 800; margin-bottom: 0.375rem; }
+  .page-header p { color: var(--ds-text-muted); font-size: 0.875rem; }
+  .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+  .metric { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; padding: 1.25rem 1.5rem; }
+  .metric-label { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); margin-bottom: 0.625rem; }
+  .metric-value { font-family: var(--ds-font-serif); font-size: 1.875rem; font-weight: 700; line-height: 1; }
+  .section { margin-bottom: 2rem; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+  .section-header h2 { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 700; }
+  .card { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; overflow: hidden; padding: 1.5rem; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .chart-container { height: 220px; display: flex; align-items: flex-end; gap: 8px; padding-top: 16px; }
+  .chart-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .chart-bar { width: 100%; background: var(--ds-primary); border-radius: 3px 3px 0 0; transition: transform 0.2s, background 0.2s; cursor: pointer; }
+  .chart-bar:hover { transform: scaleX(1.08); background: var(--ds-primary-hover); }
+  .chart-label { font-size: 0.6875rem; font-weight: 600; color: var(--ds-text-muted); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .activity-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .activity-table th { text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); }
+  .activity-table td { padding: 0.875rem 1.25rem; font-size: 0.8125rem; border-bottom: 1px solid var(--ds-border); }
+  .activity-table tr:last-child td { border-bottom: none; }
+  .activity-table tr:hover td { background: oklch(0.985 0.003 75); }
+  .badge { display: inline-flex; align-items: center; padding: 0.1875rem 0.5rem; border-radius: 4px; font-size: 0.6875rem; font-weight: 600; }
+  .badge.green { background: var(--ds-green-subtle); color: var(--ds-green); }
+  .badge.amber { background: var(--ds-amber-subtle); color: var(--ds-amber); }
+  .mobile-header { display: none; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--ds-white); border-bottom: 1px solid var(--ds-border); position: sticky; top: 0; z-index: 40; }
+  .mobile-header .logo { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 800; letter-spacing: 0.08em; }
+  .mobile-toggle { width: 36px; height: 36px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .mobile-toggle svg { width: 20px; height: 20px; }
+  .mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 49; display: none; }
+  .mobile-overlay.open { display: block; }
+  @media (max-width: 900px) { .main-content { padding: 1.5rem; } .chart-row { grid-template-columns: 1fr; } .metrics-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; z-index: 50; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-header { display: flex; }
+    .main-content { padding: 1rem; }
+    .page-header h1 { font-size: 1.375rem; }
+    .metrics-row { grid-template-columns: 1fr; }
+    .activity-table { font-size: 0.75rem; }
+    .activity-table th, .activity-table td { padding: 0.625rem 0.75rem; }
+  }
+</style>
 </head>
 <body>
-<div class="admin-layout">
-<aside class="sidebar">
-<div class="sidebar-header"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="sidebar-logo">BIBLIO</div><span class="text-xs uppercase text-muted">Admin</span></div>
-<nav class="sidebar-nav">
-<a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
-<a href="./utilizadores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Utilizadores</a>
-<a href="./relatorios.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg> Relatórios</a>
-</nav>
-<div class="sidebar-footer" id="sidebar-footer"></div>
-</aside>
-<main class="main-content"><div class="p-6" id="main"></div></main>
+<div class="mobile-header">
+  <span class="logo">BIBLIO</span>
+  <button class="mobile-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+  </button>
 </div>
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+<div class="admin-layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ds-primary)" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <div class="sidebar-logo">BIBLIO</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+    <a href="./utilizadores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Utilizadores</a>
+    <a href="./relatorios.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg> Relatórios</a>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-footer"></div>
+</aside>
+
+<main class="main-content">
+  <div class="page-header">
+    <h1>Relatórios</h1>
+    <p>Análise de performance e métricas da plataforma.</p>
+  </div>
+
+  <section class="metrics-row">
+    <div class="metric">
+      <div class="metric-label">Vendas Totais</div>
+      <div id="metric-total" class="metric-value">-</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Pedidos</div>
+      <div id="metric-orders" class="metric-value">-</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Livros no Catálogo</div>
+      <div id="metric-books" class="metric-value">-</div>
+    </div>
+  </section>
+
+  <div class="section">
+    <div class="chart-row">
+      <div class="card">
+        <div class="section-header"><h2>Vendas por Mês</h2></div>
+        <div id="sales-chart" class="chart-container"></div>
+      </div>
+      <div class="card">
+        <div class="section-header"><h2>Livros Populares</h2></div>
+        <div id="books-chart" class="chart-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h2>Histórico de Pedidos</h2></div>
+    <div class="card" style="padding:0;">
+      <table class="activity-table">
+        <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+        <tbody id="orders-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+</div>
+
 <script src="../../js/data.js"></script>
 <script src="../../js/app.js"></script>
 <script>
+function toggleMobileSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('mobile-overlay').classList.toggle('open'); }
 function renderSidebar(){
-const el=document.getElementById("sidebar-footer");
-if(!el)return;
-el.innerHTML=`<div class="sidebar-user"><img src="${currentUser?.avatar||''}" class="sidebar-user-avatar" onerror="this.style.display='none'"><div><div class="text-xs font-medium truncate">${currentUser?.name||''}</div><div class="text-xs text-muted truncate">${currentUser?.email||''}</div></div></div><a href="../catalogo.html" class="sidebar-nav" style="padding:0.25rem 0.5rem;margin-bottom:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Voltar ao site</a><a href="#" class="sidebar-nav" style="padding:0.25rem 0.5rem;" onclick="handleLogout();return false;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Terminar sessão</a>`;
+    const el=document.getElementById("sidebar-footer");
+    if(!el)return;
+    el.innerHTML=`<div style="padding:0.75rem"><div class="flex items-center gap-2.5 mb-3"><div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(242,242,242,0.6)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="overflow-hidden"><div class="text-xs font-bold truncate" style="color:#ffffff">${currentUser?.name||'Admin'}</div><div class="text-xs truncate" style="color:rgba(255,255,255,0.5)">${currentUser?.email||''}</div></div></div><button onclick="logout()" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-md bg-red-950 text-red-400 text-xs font-bold uppercase tracking-wider hover:bg-red-900 transition border border-red-900"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Sair</button></div>`;
+}
+function orderBadge(status){
+    if(status==='pago') return '<span class="badge green">pago</span>';
+    if(status==='pendente') return '<span class="badge amber">pendente</span>';
+    return `<span class="badge">${status}</span>`;
 }
 function render(){
-document.getElementById("main").innerHTML=`<div class="space-y-6"><div><h1 class="font-display text-3xl font-bold">Relatórios</h1><p class="text-sm text-muted">Visão geral de vendas e utilizadores</p></div><div class="grid lg-grid-cols-2" style="gap:1.5rem;"><div class="card card-p-5"><h3 class="mb-3 font-semibold">Vendas por mês</h3><div style="height:260px;display:flex;align-items:flex-end;gap:8px;padding-top:20px;">${salesByMonth.map(s=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:${(s.vendas/3500)*220}px;"></div><span class="text-xs text-muted">${s.month}</span></div>`).join("")}</div></div><div class="card card-p-5"><h3 class="mb-3 font-semibold">Livros mais comprados</h3><div style="height:260px;display:flex;align-items:flex-end;gap:8px;padding-top:20px;">${topSelling.map(s=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:100%;background:var(--primary);border-radius:4px 4px 0 0;height:${(s.vendas/120)*220}px;"></div><span class="text-xs text-muted truncate" style="max-width:100%;text-align:center;">${s.titulo}</span></div>`).join("")}</div></div></div><div class="card card-p-5"><h3 class="mb-3 font-semibold">Resumo de pedidos</h3><table class="table"><thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>${orders.map(o=>`<tr><td>${o.id}</td><td>${formatDate(o.date)}</td><td>${users.find(u=>u.id===o.userId)?.name||o.userId}</td><td>${formatEUR(o.total)}</td><td><span class="badge ${o.status==="pago"?"badge-primary":""}">${o.status}</span></td></tr>`).join("")}</tbody></table></div></div>`;
+    const totalVendas = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+    document.getElementById("metric-total").innerText = formatAOA(totalVendas);
+    document.getElementById("metric-orders").innerText = orders.length;
+    document.getElementById("metric-books").innerText = books.length;
+
+    const maxSales = Math.max(...salesByMonth.map(s => s.vendas), 1);
+    document.getElementById("sales-chart").innerHTML = salesByMonth.map(s => `
+      <div class="chart-bar-wrapper">
+        <div class="chart-bar" style="height: ${(s.vendas/maxSales)*180}px;" title="${formatAOA(s.vendas)}"></div>
+        <span class="chart-label">${s.month}</span>
+      </div>
+    `).join("");
+
+    const maxBooks = Math.max(...topSelling.map(s => s.vendas), 1);
+    document.getElementById("books-chart").innerHTML = topSelling.map(s => `
+      <div class="chart-bar-wrapper">
+        <div class="chart-bar" style="height: ${(s.vendas/maxBooks)*180}px;" title="${s.vendas} vendas"></div>
+        <span class="chart-label" title="${s.titulo}">${s.titulo.split(' ').slice(0,2).join(' ')}</span>
+      </div>
+    `).join("");
+
+    document.getElementById("orders-table-body").innerHTML = orders.map(o => `
+      <tr>
+        <td class="font-bold">#${o.id}</td>
+        <td class="text-ds-text-muted">${formatDate(o.date)}</td>
+        <td>${users.find(u => u.id === o.userId)?.name || '—'}</td>
+        <td class="font-bold">${formatAOA(o.total)}</td>
+        <td>${orderBadge(o.status)}</td>
+      </tr>
+    `).join("");
 }
-document.addEventListener("DOMContentLoaded",()=>{renderSidebar();render();});
+document.addEventListener("DOMContentLoaded",()=>{ renderSidebar(); render(); });
 </script>
 </body>
 </html>

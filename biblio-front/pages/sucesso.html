@@ -7,6 +7,18 @@
 </head>
 <body>
 <header id="header" class="sticky-header"></header>
+<div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+<div class="mobile-nav-panel">
+  <div class="mobile-logo">BIBLIO</div>
+  <nav>
+    <a href="./catalogo.html">Catálogo</a>
+    <a href="./biblioteca.html">Minha Biblioteca</a>
+    <div class="mobile-sep"></div>
+    <a href="./carrinho.html">Carrinho</a>
+  </nav>
+  <div class="mobile-user-section" id="mobile-user-section"></div>
+</div>
+</div>
 <main class="container py-20 text-center">
 <div class="text-6xl mb-4">Sucesso</div>
 <h1 class="font-display text-3xl font-bold">Compra realizada com sucesso!</h1>

@@ -62,4 +62,22 @@ class Autor
             ':biografia' => $dados['biografia']
         ]);
     }
+
+    public function eliminar($id)
+    {
+        $sql = "DELETE FROM autores WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function atualizar($id, $dados)
+    {
+        $sql = "UPDATE autores SET nome = :nome, biografia = :biografia WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':id' => $id,
+            ':nome' => $dados['nome'],
+            ':biografia' => $dados['biografia'] ?? null
+        ]);
+    }
 }

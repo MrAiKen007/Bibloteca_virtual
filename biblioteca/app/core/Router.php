@@ -32,6 +32,11 @@ class Router
         $this->rotas['POST'][$url] = $acao;
     }
 
+    public function delete($url, $acao)
+    {
+        $this->rotas['DELETE'][$url] = $acao;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | EXECUTAR ROTA

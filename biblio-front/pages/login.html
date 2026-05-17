@@ -10,7 +10,6 @@
 <div class="card auth-card">
 <a href="./catalogo.html" class="block text-center font-display text-3xl font-bold tracking-wider">BIBLIO</a>
 <h1 class="mt-6 text-center text-2xl font-display">Iniciar sessão</h1>
-<p class="mt-1 text-center text-sm text-muted">Use <code class="rounded bg-secondary px-1">admin@biblio.pt</code>, <code class="rounded bg-secondary px-1">bo@biblio.pt</code> ou qualquer email</p>
 <form id="login-form" class="mt-6 space-y-4">
 <div><label class="label">E-mail</label><input type="email" class="input" id="email" required></div>
 <div><label class="label">Palavra-passe</label><div class="relative"><input type="password" class="input" id="pwd" required><button type="button" class="icon-btn absolute" style="right:4px;top:50%;transform:translateY(-50%);" onclick="const el=document.getElementById('pwd');el.type=el.type==='password'?'text':'password';"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
@@ -23,15 +22,29 @@
 <script src="../js/data.js"></script>
 <script src="../js/app.js"></script>
 <script>
-document.getElementById("login-form").addEventListener("submit",function(e){
+document.getElementById("login-form").addEventListener("submit", async function(e){
 e.preventDefault();
 const btn=document.getElementById("login-btn");
+const originalText = btn.textContent;
 btn.disabled=true;btn.textContent="A entrar...";
-const u=login(document.getElementById("email").value,document.getElementById("pwd").value);
-toast("Bem-vindo, "+u.name);
-if(u.role==="admin")location.href="./admin/dashboard.html";
-else if(u.role==="backoffice")location.href="./backoffice/dashboard.html";
-else location.href="./biblioteca.html";
+try {
+    const u = await login(document.getElementById("email").value, document.getElementById("pwd").value);
+    if (u) {
+        toast("Bem-vindo, " + u.name);
+        // Deixar o app.js lidar com o redirecionamento baseado no role
+        setTimeout(() => {
+            if(u.role==="admin") location.href="./admin/dashboard.html";
+            else if(u.role==="backoffice") location.href="./backoffice/dashboard.html";
+            else location.href="./biblioteca.html";
+        }, 500);
+    } else {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+} catch (err) {
+    btn.disabled = false;
+    btn.textContent = originalText;
+}
 });
 </script>
 </body>

@@ -3,37 +3,447 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Livros — Backoffice — BIBLIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/styles.css">
+<style>
+  :root {
+    --ds-primary: #e84848; --ds-primary-hover: #c93535; --ds-primary-subtle: oklch(0.93 0.02 25);
+    --ds-bg: #f6f5f4; --ds-text: #1a1a1a; --ds-text-muted: #7a7a7a; --ds-border: #e5e3e0;
+    --ds-white: #ffffff; --ds-sidebar: #1a1a1a;
+    --ds-font-serif: 'Playfair Display', serif; --ds-font-sans: 'Inter', sans-serif;
+    --ds-green: oklch(0.62 0.14 145); --ds-green-subtle: oklch(0.94 0.025 145);
+    --ds-amber: oklch(0.78 0.14 75); --ds-amber-subtle: oklch(0.95 0.025 75);
+    --ds-blue: oklch(0.62 0.14 230); --ds-blue-subtle: oklch(0.94 0.025 230);
+  }
+  body { background: var(--ds-bg); color: var(--ds-text); font-family: var(--ds-font-sans); -webkit-font-smoothing: antialiased; }
+  .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--ds-sidebar); padding: 1.75rem 0.875rem; display: flex; flex-direction: column; color: var(--ds-sidebar-text); position: sticky; top: 0; height: 100vh; }
+  .sidebar-header { display: flex; align-items: center; gap: 0.625rem; padding: 0 0.75rem 2rem; }
+  .sidebar-logo { font-family: var(--ds-font-serif); font-weight: 700; letter-spacing: 0.06em; font-size: 1.125rem; color: #ffffff; }
+  .sidebar-nav a { display: flex; align-items: center; gap: 0.625rem; padding: 0.625rem 0.75rem; border-radius: 6px; color: #ffffff; font-weight: 500; text-decoration: none; transition: all 0.15s; margin-bottom: 0.125rem; font-size: 0.8125rem; }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #ffffff; }
+  .sidebar-nav a.active { background: rgba(232,72,72,0.12); color: var(--ds-primary); }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .main-content { padding: 2.5rem 3rem; max-width: 1200px; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: var(--ds-font-serif); font-size: 1.75rem; font-weight: 800; margin-bottom: 0.375rem; }
+  .page-header p { color: var(--ds-text-muted); font-size: 0.875rem; }
+  .action-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .action-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.15s; border: 1px solid var(--ds-border); background: var(--ds-white); color: var(--ds-text); cursor: pointer; }
+  .action-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+  .action-btn.primary { background: var(--ds-primary); color: white; border-color: var(--ds-primary); }
+  .action-btn.primary:hover { background: var(--ds-primary-hover); }
+  .filter-bar { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr 180px 180px; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .input-field { width: 100%; padding: 0.5rem 0.875rem; border-radius: 6px; border: 1px solid var(--ds-border); font-size: 0.8125rem; outline: none; transition: border-color 0.15s; font-family: var(--ds-font-sans); }
+  .input-field:focus { border-color: var(--ds-primary); }
+  .card { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; overflow: hidden; }
+  .activity-table { width: 100%; border-collapse: collapse; }
+  .activity-table th { text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); }
+  .activity-table td { padding: 0.875rem 1.25rem; font-size: 0.8125rem; border-bottom: 1px solid var(--ds-border); vertical-align: middle; }
+  .activity-table tr:last-child td { border-bottom: none; }
+  .activity-table tr:hover td { background: oklch(0.985 0.003 75); }
+  .book-thumb { width: 36px; height: 50px; object-fit: cover; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .badge { display: inline-flex; align-items: center; padding: 0.1875rem 0.5rem; border-radius: 4px; font-size: 0.6875rem; font-weight: 600; }
+  .badge.green { background: var(--ds-green-subtle); color: var(--ds-green); }
+  .badge.amber { background: var(--ds-amber-subtle); color: var(--ds-amber); }
+  .badge.blue { background: var(--ds-blue-subtle); color: var(--ds-blue); }
+  .badge.red { background: var(--ds-primary-subtle); color: var(--ds-primary); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; background: transparent; border: 1px solid var(--ds-border); color: var(--ds-text-muted); transition: all 0.15s; cursor: pointer; }
+  .icon-btn:hover { color: var(--ds-primary); border-color: var(--ds-primary); background: var(--ds-bg); }
+  .icon-btn.danger:hover { color: #dc2626; border-color: #dc2626; background: #fef2f2; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--ds-white); border-radius: 10px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--ds-border); }
+  .modal-header h2 { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 700; }
+  .modal-close { width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ds-text-muted); transition: all 0.15s; }
+  .modal-close:hover { background: var(--ds-bg); color: var(--ds-text); }
+  .modal-body { padding: 1.75rem; }
+  .form-group { margin-bottom: 1.125rem; }
+  .form-label { display: block; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); margin-bottom: 0.375rem; }
+  .form-input { width: 100%; padding: 0.625rem 0.875rem; border-radius: 6px; border: 1px solid var(--ds-border); font-size: 0.8125rem; outline: none; transition: all 0.15s; font-family: var(--ds-font-sans); }
+  .form-input:focus { border-color: var(--ds-primary); box-shadow: 0 0 0 3px rgba(232,72,72,0.06); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--ds-border); margin-top: 1.25rem; }
+  .btn-cancel { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--ds-border); background: transparent; color: var(--ds-text-muted); font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { background: var(--ds-bg); color: var(--ds-text); }
+  .btn-save { padding: 0.5rem 1.25rem; border-radius: 6px; border: none; background: var(--ds-primary); color: white; font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; }
+  .btn-save:hover { background: var(--ds-primary-hover); }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  textarea.form-input { resize: vertical; min-height: 72px; }
+  select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 2.25rem; }
+  .cover-upload { display: flex; align-items: center; gap: 0.875rem; }
+  .cover-preview { width: 64px; height: 88px; border-radius: 6px; border: 2px dashed var(--ds-border); display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--ds-bg); flex-shrink: 0; cursor: pointer; transition: border-color 0.15s; }
+  .cover-preview:hover { border-color: var(--ds-primary); }
+  .cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .cover-preview svg { width: 20px; height: 20px; color: var(--ds-text-muted); }
+  .cover-info { font-size: 0.6875rem; color: var(--ds-text-muted); }
+  .cover-info strong { display: block; color: var(--ds-text); font-size: 0.75rem; margin-bottom: 0.125rem; }
+  .cover-input { display: none; }
+  .cover-btn { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.3125rem 0.625rem; border-radius: 5px; border: 1px solid var(--ds-border); background: var(--ds-white); color: var(--ds-text); font-size: 0.6875rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .cover-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+  .pdf-upload { display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem; border: 2px dashed var(--ds-border); border-radius: 8px; background: var(--ds-bg); transition: border-color 0.15s; }
+  .pdf-upload:hover { border-color: var(--ds-primary); }
+  .pdf-upload.has-file { border-color: var(--ds-primary); background: #fef2f2; }
+  .pdf-icon { width: 40px; height: 40px; border-radius: 6px; background: var(--ds-primary); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pdf-icon svg { width: 20px; height: 20px; }
+  .pdf-info { flex: 1; }
+  .pdf-info strong { display: block; font-size: 0.8125rem; margin-bottom: 0.125rem; }
+  .pdf-info span { font-size: 0.6875rem; color: var(--ds-text-muted); }
+  .pdf-file-name { font-size: 0.75rem; font-weight: 600; color: var(--ds-primary); margin-top: 0.125rem; }
+  .pdf-btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; border-radius: 5px; border: 1px solid var(--ds-border); background: var(--ds-white); cursor: pointer; font-size: 0.75rem; font-weight: 600; color: var(--ds-text); transition: all 0.15s; }
+  .pdf-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+  .tag-checkbox { display: inline-flex; align-items: center; gap: 0.3125rem; padding: 0.3125rem 0.625rem; border-radius: 5px; border: 1px solid var(--ds-border); background: var(--ds-bg); color: var(--ds-text); font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .tag-checkbox:hover { border-color: var(--ds-primary); }
+  .tag-checkbox.selected { background: var(--ds-primary); color: white; border-color: var(--ds-primary); }
+  .tag-checkbox svg { width: 12px; height: 12px; }
+  .mobile-header { display: none; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--ds-white); border-bottom: 1px solid var(--ds-border); position: sticky; top: 0; z-index: 40; }
+  .mobile-header .logo { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 800; letter-spacing: 0.08em; }
+  .mobile-toggle { width: 36px; height: 36px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .mobile-toggle svg { width: 20px; height: 20px; }
+  .mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 49; display: none; }
+  .mobile-overlay.open { display: block; }
+  @media (max-width: 900px) { .main-content { padding: 1.5rem; } .filter-bar { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; z-index: 50; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-header { display: flex; }
+    .main-content { padding: 1rem; }
+    .page-header h1 { font-size: 1.375rem; }
+    .action-row { flex-direction: column; }
+    .action-btn { justify-content: center; }
+    .modal { max-width: 100%; margin: 0.75rem; border-radius: 10px 10px 0 0; align-self: flex-end; }
+    .modal-header { padding: 1.125rem 1.25rem; }
+    .modal-body { padding: 1.25rem; }
+    .form-actions { flex-direction: column; }
+    .form-actions .btn-cancel, .form-actions .btn-save { width: 100%; text-align: center; justify-content: center; }
+    .activity-table thead { display: none; }
+    .activity-table, .activity-table tbody, .activity-table tr, .activity-table td { display: block; width: 100%; }
+    .activity-table tr { padding: 0.875rem; border-bottom: 1px solid var(--ds-border); }
+    .activity-table td { padding: 0.25rem 0; border: none; text-align: left; }
+    .cover-upload { flex-direction: column; align-items: flex-start; }
+    .cover-preview { width: 100%; height: 140px; }
+  }
+</style>
 </head>
 <body>
-<div class="admin-layout">
-<aside class="sidebar">
-<div class="sidebar-header"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="sidebar-logo">BIBLIO</div><span class="text-xs uppercase text-muted">Backoffice</span></div>
-<nav class="sidebar-nav">
-<a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
-<a href="./livros.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21h10"/><path d="M6 20h12"/><path d="M6 16h12"/><path d="M5 2h14"/><path d="M6 2v18"/><path d="M18 2v18"/></svg> Livros</a>
-<a href="./autores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Autores</a>
-<a href="./editoras.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Editoras</a>
-<a href="./taxonomias.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10h10V2z"/><path d="M12 12H2v10h10V12z"/><path d="M22 2h-10v10h10V2z"/><path d="M22 12h-10v10h10V12z"/></svg> Géneros & Tags</a>
-</nav>
-<div class="sidebar-footer" id="sidebar-footer"></div>
-</aside>
-<main class="main-content"><div class="p-6" id="main"></div></main>
+<div class="mobile-header">
+  <span class="logo">BIBLIO</span>
+  <button class="mobile-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+  </button>
 </div>
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+<div class="admin-layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ds-primary)" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <div class="sidebar-logo">BIBLIO</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+    <a href="./livros.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg> Livros</a>
+    <a href="./autores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Autores</a>
+    <a href="./editoras.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg> Editoras</a>
+    <a href="./taxonomias.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10h10V2z"/><path d="M12 12H2v10h10V12z"/><path d="M22 2h-10v10h10V2z"/><path d="M22 12h-10v10h10V12z"/></svg> Géneros & Tags</a>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-footer"></div>
+</aside>
+
+<main class="main-content">
+  <div class="page-header">
+    <h1>Catálogo de Livros</h1>
+    <p>Gerencie os títulos, preços e disponibilidade da biblioteca.</p>
+  </div>
+
+  <div class="action-row">
+    <button class="action-btn primary" onclick="openBookModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7v14"/></svg>
+      Adicionar Livro
+    </button>
+  </div>
+
+  <div class="filter-bar">
+    <input type="text" id="search-input" placeholder="Pesquisar por título ou autor..." class="input-field" oninput="handleFilter()">
+    <select id="status-filter" class="input-field" onchange="handleFilter()">
+      <option value="todos">Todos os Estados</option>
+      <option value="publicado">Publicado</option>
+      <option value="rascunho">Rascunho</option>
+    </select>
+    <select id="access-filter" class="input-field" onchange="handleFilter()">
+      <option value="todos">Todos os Acessos</option>
+      <option value="comprar">Apenas Venda</option>
+      <option value="ler">Apenas Leitura</option>
+      <option value="ambos">Ambos</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <table class="activity-table">
+      <thead><tr><th>Capa</th><th>Título</th><th>Autor</th><th>PDF</th><th>Estado</th><th>Acesso</th><th>Preço</th><th class="text-right">Ações</th></tr></thead>
+      <tbody id="books-table-body"></tbody>
+    </table>
+  </div>
+</main>
+</div>
+
+<div class="modal-overlay" id="book-modal" onclick="if(event.target===this)closeBookModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Novo Livro</h2>
+      <button class="modal-close" onclick="closeBookModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="book-form" onsubmit="handleBookSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Capa do Livro</label>
+          <div class="cover-upload">
+            <div class="cover-preview" id="cover-preview" onclick="document.getElementById('cover-input').click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </div>
+            <div class="cover-info">
+              <strong>Imagem de capa</strong>
+              <span>JPG, PNG ou WebP. Máx 5MB.</span><br>
+              <button type="button" class="cover-btn" onclick="document.getElementById('cover-input').click()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                Escolher ficheiro
+              </button>
+              <input type="file" id="cover-input" class="cover-input" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleCoverPreview(this)">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ficheiro PDF</label>
+          <div class="pdf-upload" id="pdf-upload-area">
+            <div class="pdf-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="pdf-info">
+              <strong>PDF do livro</strong>
+              <span>Formato PDF apenas. Máx 50MB.</span>
+              <div class="pdf-file-name" id="pdf-file-name" style="display:none"></div>
+            </div>
+            <button type="button" class="pdf-btn" onclick="document.getElementById('pdf-input').click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              Escolher PDF
+            </button>
+            <input type="file" id="pdf-input" class="cover-input" accept="application/pdf" onchange="handlePdfSelect(this)" style="display:none">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Título *</label>
+          <input type="text" name="titulo" class="form-input" required placeholder="Ex: Dom Casmurro">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Autor *</label>
+            <select name="autor_id" class="form-input" required id="book-autor-select"><option value="">Selecionar autor...</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Editora *</label>
+            <select name="editora_id" class="form-input" required id="book-editora-select"><option value="">Selecionar editora...</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sinopse</label>
+          <textarea name="sinopse" class="form-input" placeholder="Breve descrição do livro..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">ISBN</label>
+            <input type="text" name="isbn" class="form-input" placeholder="978-...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Idioma</label>
+            <input type="text" name="idioma" class="form-input" value="Português">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ano</label>
+            <input type="number" name="ano_publicacao" class="form-input" placeholder="2024">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nº Páginas</label>
+            <input type="number" name="numero_paginas" class="form-input" placeholder="256">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Preço (Kz) *</label>
+            <input type="number" name="preco" class="form-input" required step="0.01" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado</label>
+            <select name="estado" class="form-input"><option value="rascunho">Rascunho</option><option value="publicado">Publicado</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Comprável</label>
+            <select name="compravel" class="form-input"><option value="1">Sim</option><option value="0">Não</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Legível no site</label>
+            <select name="legivel_no_site" class="form-input"><option value="1">Sim</option><option value="0">Não</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Géneros Literários</label>
+          <div id="book-genres-select" style="display:flex;flex-wrap:wrap;gap:0.375rem;"></div>
+          <span class="text-xs text-ds-text-muted">Clique para selecionar.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags & Etiquetas</label>
+          <div id="book-tags-select" style="display:flex;flex-wrap:wrap;gap:0.375rem;"></div>
+          <span class="text-xs text-ds-text-muted">Clique para selecionar.</span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeBookModal()">Cancelar</button>
+          <button type="submit" class="btn-save" id="book-submit-btn">Guardar Livro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="../../js/data.js"></script>
 <script src="../../js/app.js"></script>
 <script>
-let q="",status="todos",tipo="todos";
+function toggleMobileSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('mobile-overlay').classList.toggle('open'); }
 function renderSidebar(){
-const el=document.getElementById("sidebar-footer");
-if(!el)return;
-el.innerHTML=`<div class="sidebar-user"><img src="${currentUser?.avatar||''}" class="sidebar-user-avatar" onerror="this.style.display='none'"><div><div class="text-xs font-medium truncate">${currentUser?.name||''}</div><div class="text-xs text-muted truncate">${currentUser?.email||''}</div></div></div><a href="../catalogo.html" class="sidebar-nav" style="padding:0.25rem 0.5rem;margin-bottom:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Voltar ao site</a><a href="#" class="sidebar-nav" style="padding:0.25rem 0.5rem;" onclick="handleLogout();return false;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Terminar sessão</a>`;
+    const el=document.getElementById("sidebar-footer");
+    if(!el)return;
+    el.innerHTML=`<div style="padding:0.75rem"><div class="flex items-center gap-2.5 mb-3"><div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(242,242,242,0.6)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="overflow-hidden"><div class="text-xs font-bold truncate" style="color:#ffffff">${currentUser?.name||'Operador'}</div><div class="text-xs truncate" style="color:rgba(255,255,255,0.5)">${currentUser?.email||''}</div></div></div><button onclick="logout()" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-md bg-red-950 text-red-400 text-xs font-bold uppercase tracking-wider hover:bg-red-900 transition border border-red-900"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Sair</button></div>`;
+}
+function openBookModal(){
+    const autorSelect = document.getElementById('book-autor-select');
+    const editoraSelect = document.getElementById('book-editora-select');
+    autorSelect.innerHTML = '<option value="">Selecionar autor...</option>' + authors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+    editoraSelect.innerHTML = '<option value="">Selecionar editora...</option>' + publishers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    document.getElementById('book-form').reset();
+    document.getElementById('cover-preview').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+    document.getElementById('pdf-file-name').style.display = 'none';
+    document.getElementById('pdf-upload-area').classList.remove('has-file');
+    selectedTags = []; selectedGenres = [];
+    renderTagsSelect(); renderGenresSelect();
+    document.getElementById('book-modal').classList.add('open');
+}
+function closeBookModal(){
+    document.getElementById('book-modal').classList.remove('open');
+    selectedTags = []; selectedGenres = [];
+    renderTagsSelect(); renderGenresSelect();
+}
+let selectedTags = []; let selectedGenres = [];
+function renderTagsSelect(){
+    const container = document.getElementById('book-tags-select');
+    if (!container) return;
+    const allTags = typeof TAGS !== 'undefined' ? TAGS : [];
+    container.innerHTML = allTags.map(tag => {
+        const isSelected = selectedTags.includes(tag);
+        return `<span class="tag-checkbox ${isSelected ? 'selected' : ''}" onclick="toggleTag('${tag}')">${isSelected ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${tag}</span>`;
+    }).join('');
+}
+function renderGenresSelect(){
+    const container = document.getElementById('book-genres-select');
+    if (!container) return;
+    const allGenres = typeof GENRES !== 'undefined' ? GENRES : [];
+    container.innerHTML = allGenres.map(genre => {
+        const isSelected = selectedGenres.includes(genre);
+        return `<span class="tag-checkbox ${isSelected ? 'selected' : ''}" onclick="toggleGenre('${genre}')">${isSelected ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${genre}</span>`;
+    }).join('');
+}
+function toggleTag(tag){ selectedTags = selectedTags.includes(tag) ? selectedTags.filter(t => t !== tag) : [...selectedTags, tag]; renderTagsSelect(); }
+function toggleGenre(genre){ selectedGenres = selectedGenres.includes(genre) ? selectedGenres.filter(g => g !== genre) : [...selectedGenres, genre]; renderGenresSelect(); }
+function handleCoverPreview(input){
+    const preview = document.getElementById('cover-preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e){ preview.innerHTML = `<img src="${e.target.result}" alt="Capa">`; };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+function handlePdfSelect(input){
+    const area = document.getElementById('pdf-upload-area');
+    const nameEl = document.getElementById('pdf-file-name');
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        nameEl.textContent = file.name + ' (' + (file.size / (1024 * 1024)).toFixed(1) + ' MB)';
+        nameEl.style.display = 'block'; area.classList.add('has-file');
+    } else { nameEl.style.display = 'none'; area.classList.remove('has-file'); }
+}
+async function handleBookSubmit(e){
+    e.preventDefault();
+    const btn = document.getElementById('book-submit-btn');
+    btn.disabled = true; btn.textContent = 'A guardar...';
+    const formData = new FormData(e.target);
+    const coverInput = document.getElementById('cover-input');
+    if (coverInput.files && coverInput.files[0]) formData.append('capa', coverInput.files[0]);
+    const pdfInput = document.getElementById('pdf-input');
+    if (pdfInput.files && pdfInput.files[0]) formData.append('pdf', pdfInput.files[0]);
+    formData.append('tags', JSON.stringify(selectedTags));
+    formData.append('generos', JSON.stringify(selectedGenres));
+    try {
+        const response = await fetch(`${API_URL}/livros/guardar`, { method: 'POST', body: formData, credentials: 'include' });
+        const result = await response.json();
+        if (result.sucesso) { toast('Livro adicionado com sucesso!'); closeBookModal(); await fetchBooks(); render(); }
+        else toast(result.mensagem || result.erro || 'Erro ao adicionar livro', 'error');
+    } catch (err) { toast('Erro de ligação ao servidor', 'error'); }
+    btn.disabled = false; btn.textContent = 'Guardar Livro';
+}
+async function handleDeleteBook(id){
+    if (!confirm('Eliminar este livro?')) return;
+    try {
+        const result = await apiFetch(`livros/eliminar?id=${id}`, { method: 'DELETE' });
+        if (result.sucesso) { toast('Livro eliminado'); await fetchBooks(); render(); }
+        else toast(result.mensagem || 'Erro ao eliminar', 'error');
+    } catch (err) { toast('Erro de ligação', 'error'); }
+}
+function handleFilter(){ render(); }
+function statusBadge(s){
+    if(s==='publicado') return '<span class="badge green">publicado</span>';
+    if(s==='rascunho') return '<span class="badge amber">rascunho</span>';
+    return `<span class="badge">${s||'rascunho'}</span>`;
+}
+function accessBadge(a){
+    if(a==='ambos') return '<span class="badge blue">ambos</span>';
+    if(a==='comprar') return '<span class="badge green">venda</span>';
+    if(a==='ler') return '<span class="badge amber">leitura</span>';
+    return `<span class="badge">${a||'—'}</span>`;
 }
 function render(){
-const filtered=books.filter(b=>b.title.toLowerCase().includes(q.toLowerCase())&&(status==="todos"||b.status===status)&&(tipo==="todos"||b.access===tipo));
-document.getElementById("main").innerHTML=`<div class="space-y-6"><div class="flex flex-wrap items-center justify-between gap-3"><h1 class="font-display text-3xl font-bold">Livros</h1><button class="btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg> Adicionar Livro</button></div><div class="card card-p"><div class="grid md-grid-cols-3" style="gap:0.75rem;"><input class="input" placeholder="Pesquisar título..." value="${q}" oninput="q=this.value;render()"><select class="input" onchange="status=this.value;render()"><option value="todos">Todos os estados</option><option value="publicado">Publicado</option><option value="rascunho">Rascunho</option><option value="arquivado">Arquivado</option></select><select class="input" onchange="tipo=this.value;render()"><option value="todos">Todos os tipos</option><option value="comprar">Comprar</option><option value="ler">Ler</option><option value="ambos">Ambos</option></select></div></div><div class="card p-0"><table class="table"><thead><tr><th class="w-16">Capa</th><th>Título</th><th>Autor</th><th>Estado</th><th>Tipo</th><th>Preço</th><th class="text-right">Ações</th></tr></thead><tbody>${filtered.map(b=>`<tr><td><img src="${b.cover}" style="width:36px;height:48px;object-fit:cover;border-radius:var(--radius);"></td><td class="font-medium">${b.title}</td><td>${getAuthor(b.authorId)?.name||""}</td><td><span class="badge ${b.status==="publicado"?"badge-primary":""}">${b.status}</span></td><td><span class="badge badge-outline">${b.access}</span></td><td>${formatAOA(b.price)}</td><td class="text-right"><div class="flex justify-end gap-1"><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button><button class="icon-btn" title="${b.status==="publicado"?"Despublicar":"Publicar"}">${b.status==="publicado"?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>'}</button><button class="icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 7.5-2.7-2.7a2.12 2.12 0 0 0-3 0L9 11l-1 4 4-1 6.3-6.3a2.12 2.12 0 0 0 0-3Z"/><path d="M12 20h9"/><path d="M16 2v6"/><path d="M19 5h-6"/></svg></button></div></td></tr>`).join("")}</tbody></table></div></div>`;
+    const q = document.getElementById("search-input").value.toLowerCase();
+    const status = document.getElementById("status-filter").value;
+    const access = document.getElementById("access-filter").value;
+    const filtered = books.filter(b => {
+        const matchesQuery = b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q);
+        const matchesStatus = status === 'todos' || b.status === status;
+        const matchesAccess = access === 'todos' || b.access === access;
+        return matchesQuery && matchesStatus && matchesAccess;
+    });
+    const tbody = document.getElementById("books-table-body");
+    if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-ds-text-muted" style="padding:3rem;">Nenhum livro encontrado.</td></tr>'; return; }
+    tbody.innerHTML = filtered.map(b => `
+      <tr>
+        <td><img src="${b.cover}" class="book-thumb" onerror="this.src='https://picsum.photos/seed/${b.id}/36/50'"></td>
+        <td><div class="font-bold">${b.title}</div></td>
+        <td class="text-ds-text-muted">${b.author || '---'}</td>
+        <td>${b.caminho_pdf ? '<span class="badge blue">PDF</span>' : '<span class="text-ds-text-muted text-xs">—</span>'}</td>
+        <td>${statusBadge(b.status)}</td>
+        <td>${accessBadge(b.access)}</td>
+        <td class="font-bold">${formatAOA(b.price)}</td>
+        <td class="text-right"><div class="flex justify-end gap-1.5">
+          <button class="icon-btn danger" onclick="handleDeleteBook(${b.id})" title="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+        </div></td>
+      </tr>`).join("");
 }
-document.addEventListener("DOMContentLoaded",()=>{renderSidebar();render();});
+document.addEventListener("DOMContentLoaded", async ()=>{
+    renderSidebar();
+    await Promise.all([fetchBooks(), fetchAutores(), fetchEditoras()]);
+    render(); renderTagsSelect(); renderGenresSelect();
+});
 </script>
 </body>
 </html>

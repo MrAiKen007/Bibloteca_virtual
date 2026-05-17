@@ -62,4 +62,11 @@ class Editora
             ':pais' => $dados['pais']
         ]);
     }
+
+    public function eliminar($id)
+    {
+        $sql = "DELETE FROM editoras WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
 }

@@ -1,0 +1,96 @@
+# ============================================
+# BIBLIO - Biblioteca Virtual .gitignore
+# ============================================
+
+# --------------------------------------------
+# AI / Tool Directories
+# --------------------------------------------
+.claude/
+.opencode/
+.qodo/
+biblio-front/.qodo/
+
+# --------------------------------------------
+# Database Dumps
+# --------------------------------------------
+biblioteca/Dump*/
+biblioteca/Dump*.zip
+biblioteca/Dump*.sql
+
+# --------------------------------------------
+# User Uploads (covers, PDFs)
+# --------------------------------------------
+biblioteca/public/uploads/
+!biblioteca/public/uploads/.gitkeep
+
+# --------------------------------------------
+# Debug / Test / One-off Scripts
+# --------------------------------------------
+biblioteca/public/debug_*.php
+biblioteca/public/test_*.php
+biblioteca/public/importar_db.php
+biblioteca/public/verificar_admin.php
+biblioteca/testes/
+biblioteca/gerar_hash.php
+
+# --------------------------------------------
+# Environment Files
+# --------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --------------------------------------------
+# Log Files
+# --------------------------------------------
+*.log
+biblioteca/storage/logs/
+biblioteca/logs/
+
+# --------------------------------------------
+# Cache / Temp
+# --------------------------------------------
+biblioteca/storage/cache/
+biblioteca/cache/
+biblioteca/tmp/
+
+# --------------------------------------------
+# Composer
+# --------------------------------------------
+/vendor/
+composer.lock
+
+# --------------------------------------------
+# Node.js
+# --------------------------------------------
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+bun.lock
+yarn.lock
+dist/
+
+# --------------------------------------------
+# IDE / Editor
+# --------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.iml
+
+# --------------------------------------------
+# OS Files
+# --------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# --------------------------------------------
+# Editor Swap / Temp
+# --------------------------------------------
+*.swp
+*.swo
+*~
+*.tmp

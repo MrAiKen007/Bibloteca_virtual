@@ -4,6 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Criar conta — BIBLIO</title>
 <link rel="stylesheet" href="../css/styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 <div class="auth-page">
@@ -23,11 +24,25 @@
 <script src="../js/data.js"></script>
 <script src="../js/app.js"></script>
 <script>
-document.getElementById("reg-form").addEventListener("submit",function(e){
-e.preventDefault();
-if(document.getElementById("pwd").value!==document.getElementById("pwd2").value){toast("As palavras-passe não coincidem","error");return;}
-register(document.getElementById("name").value,document.getElementById("email").value,document.getElementById("pwd").value);
-toast("Conta criada!");location.href="./biblioteca.html";
+document.getElementById("reg-form").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const pwd = document.getElementById("pwd").value;
+    const pwd2 = document.getElementById("pwd2").value;
+
+    if(pwd !== pwd2){
+        toast("As palavras-passe não coincidem","error");
+        return;
+    }
+
+    try {
+        await register(name, email, pwd);
+        toast("Conta criada com sucesso!");
+        setTimeout(() => { location.href="./catalogo.html"; }, 1500);
+    } catch (err) {
+        // O erro já é tratado pelo toast dentro da função register() no app.js
+    }
 });
 </script>
 </body>

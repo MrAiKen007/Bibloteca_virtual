@@ -8,7 +8,16 @@
 <body>
 <header id="header" class="sticky-header"></header>
 <div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
-<div class="mobile-nav-panel"><nav><a href="./catalogo.html">Catálogo</a><a href="./biblioteca.html">Minha Biblioteca</a></nav></div>
+<div class="mobile-nav-panel">
+  <div class="mobile-logo">BIBLIO</div>
+  <nav>
+    <a href="./catalogo.html">Catálogo</a>
+    <a href="./biblioteca.html">Minha Biblioteca</a>
+    <div class="mobile-sep"></div>
+    <a href="./carrinho.html">Carrinho</a>
+  </nav>
+  <div class="mobile-user-section" id="mobile-user-section"></div>
+</div>
 </div>
 <main class="container py-10" id="main"></main>
 <footer id="footer"></footer>
@@ -16,14 +25,46 @@
 <script src="../js/app.js"></script>
 <script>
 function render(){
-const el=document.getElementById("main");
-if(cartItems.length===0){
-el.innerHTML=`<div class="container py-20 text-center"><svg class="mx-auto text-muted" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><h1 class="mt-4 font-display text-3xl">O seu carrinho está vazio</h1><a href="./catalogo.html" class="btn mt-6">Ver Catálogo</a></div>`;
-return;
+    const el = document.getElementById("main");
+    if (cartItems.length === 0) {
+        el.innerHTML = `<div class="text-center py-20"><svg class="mx-auto text-muted" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><h1 class="mt-4 font-display text-3xl">O seu carrinho está vazio</h1><a href="./catalogo.html" class="btn mt-6">Ver Catálogo</a></div>`;
+        return;
+    }
+    el.innerHTML = `
+    <div class="grid" style="gap:2rem;grid-template-columns:1fr 360px;">
+        <div>
+            <h1 class="mb-6 font-display text-3xl font-bold">Carrinho</h1>
+            <div class="space-y-3">
+                ${cartItems.map(i => {
+                    const b = getBook(i.bookId);
+                    if (!b) return "";
+                    return `<div class="card flex gap-4 p-3">
+                        <img src="${b.cover}" style="width:80px;height:112px;object-fit:cover;border-radius:var(--radius);" onerror="this.src='https://picsum.photos/seed/${b.id}/80/112'">
+                        <div style="flex:1;">
+                            <a href="./livro.html?id=${b.id}" class="font-medium hover-text-primary">${b.title}</a>
+                            <div class="text-xs text-muted">${b.author || getAuthor(b.authorId)?.name || ""}</div>
+                            <div class="mt-2 font-semibold text-primary">${formatAOA(b.price)}</div>
+                        </div>
+                        <button class="icon-btn" onclick="cartRemove('${b.id}');render();" title="Remover">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>`;
+                }).join("")}
+            </div>
+        </div>
+        <div class="card h-fit card-p-5">
+            <h3 class="font-semibold">Resumo</h3>
+            <div class="mt-4 space-y-2 text-sm">
+                <div class="flex justify-between"><span>Subtotal</span><span>${formatAOA(cartSubtotal())}</span></div>
+                <div class="flex justify-between text-muted"><span>Descontos</span><span>${formatAOA(0)}</span></div>
+                <div class="flex justify-between border-t pt-3 text-base font-semibold"><span>Total</span><span class="text-primary">${formatAOA(cartSubtotal())}</span></div>
+            </div>
+            <a href="./checkout.html" class="btn btn-w-full mt-5">Finalizar Compra</a>
+            <button class="btn btn-ghost btn-w-full mt-2" onclick="cartClear();render();" style="text-align:center;">Limpar carrinho</button>
+        </div>
+    </div>`;
 }
-el.innerHTML=`<div class="grid" style="gap:2rem;grid-template-columns:1fr 360px;"><div><h1 class="mb-6 font-display text-3xl font-bold">Carrinho</h1><div class="space-y-3">${cartItems.map(i=>{const b=getBook(i.bookId);if(!b)return"";return`<div class="card flex gap-4 p-3"><img src="${b.cover}" style="width:80px;height:112px;object-fit:cover;border-radius:var(--radius);"><div style="flex:1;"><a href="./livro.html?id=${b.id}" class="font-medium hover-text-primary">${b.title}</a><div class="text-xs text-muted">${getAuthor(b.authorId)?.name||""}</div><div class="mt-2 font-semibold text-primary">${formatAOA(b.price)}</div></div><button class="icon-btn" onclick="cartRemove('${b.id}');render();renderNavbar();"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></div>`;}).join("")}</div></div><div class="card h-fit card-p-5"><h3 class="font-semibold">Resumo</h3><div class="mt-4 space-y-2 text-sm"><div class="flex justify-between"><span>Subtotal</span><span>${formatAOA(cartSubtotal())}</span></div><div class="flex justify-between text-muted"><span>Descontos</span><span>${formatAOA(0)}</span></div><div class="flex justify-between border-t pt-3 text-base font-semibold"><span>Total</span><span class="text-primary">${formatAOA(cartSubtotal())}</span></div></div><a href="./checkout.html" class="btn btn-w-full mt-5">Finalizar Compra</a></div></div>`;
-}
-document.addEventListener("DOMContentLoaded",render);
+document.addEventListener("DOMContentLoaded", render);
 </script>
 </body>
 </html>

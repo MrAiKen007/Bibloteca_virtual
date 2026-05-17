@@ -93,7 +93,7 @@ class Utilizador
             ':palavra_passe' => $dados['palavra_passe'],
             ':papel' => $dados['papel'],
             ':ativo' => $dados['ativo'],
-            ':email_verificado' => $dados['email_verificado']
+            ':email_verificado' => $dados['email_verificado'] ?? 0
         ]);
     }
 

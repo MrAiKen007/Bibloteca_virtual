@@ -2,12 +2,6 @@
 
 class UtilizadorControlador
 {
-    /*
-    |--------------------------------------------------------------------------
-    | MODEL
-    |--------------------------------------------------------------------------
-    */
-
     private $utilizadorModel;
 
     public function __construct()
@@ -15,22 +9,22 @@ class UtilizadorControlador
         $this->utilizadorModel = new Utilizador();
     }
 
-        public function criar()
+    public function listar()
+    {
+        Autorizacao::precisaPapel(['admin', 'backoffice']);
+        $utilizadores = $this->utilizadorModel->listar();
+        require_once __DIR__ . '/../views/utilizadores/lista.php';
+    }
+
+    public function criar()
     {
         Autorizacao::precisaPapel(['admin']);
-
         require_once __DIR__ . '/../views/utilizadores/criar.php';
     }
 
-        public function guardar()
+    public function guardar()
     {
         Autorizacao::precisaPapel(['admin']);
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDAÇÃO BD (campos NOT NULL)
-        |--------------------------------------------------------------------------
-        */
 
         if (
             empty($_POST['nome_completo']) ||
@@ -39,24 +33,11 @@ class UtilizadorControlador
             empty($_POST['papel'])
         ) {
             $_SESSION['erro'] = "Preencha todos os campos obrigatórios.";
-
             header("Location: index.php?url=utilizadores/criar");
             exit;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | HASH DA SENHA
-        |--------------------------------------------------------------------------
-        */
-
         $senhaHash = password_hash($_POST['palavra_passe'], PASSWORD_BCRYPT);
-
-        /*
-        |--------------------------------------------------------------------------
-        | DADOS (IGUAL À BD)
-        |--------------------------------------------------------------------------
-        */
 
         $dados = [
             'nome_completo' => $_POST['nome_completo'],
@@ -68,22 +49,49 @@ class UtilizadorControlador
         ];
 
         $this->utilizadorModel->criar($dados);
-
         header("Location: index.php?url=utilizadores");
         exit;
     }
-    /*
-    |--------------------------------------------------------------------------
-    | LISTAR UTILIZADORES
-    |--------------------------------------------------------------------------
-    */
 
-    public function listar()
-{
-    Autorizacao::precisaPapel(['admin', 'backoffice']);
+    public function apiListar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+        $utilizadores = $this->utilizadorModel->listar();
+        Resposta::json($utilizadores);
+    }
 
-    $utilizadores = $this->utilizadorModel->listar();
+    public function apiGuardar()
+    {
+        Autorizacao::precisaPapel(['admin']);
 
-    require_once __DIR__ . '/../views/utilizadores/lista.php';
-}
+        // Ler input JSON
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (
+            empty($input['nome_completo']) ||
+            empty($input['email']) ||
+            empty($input['palavra_passe']) ||
+            empty($input['papel'])
+        ) {
+            Resposta::erro("Preencha todos os campos obrigatórios.");
+        }
+
+        $senhaHash = password_hash($input['palavra_passe'], PASSWORD_BCRYPT);
+
+        $dados = [
+            'nome_completo' => $input['nome_completo'],
+            'email' => $input['email'],
+            'palavra_passe' => $senhaHash,
+            'papel' => $input['papel'],
+            'ativo' => 1,
+            'email_verificado' => 0
+        ];
+
+        try {
+            $this->utilizadorModel->criar($dados);
+            Resposta::json(['mensagem' => "Utilizador criado com sucesso!"]);
+        } catch (Exception $e) {
+            Resposta::erro("Erro ao criar utilizador: " . $e->getMessage());
+        }
+    }
 }

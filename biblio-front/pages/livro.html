@@ -10,7 +10,14 @@
   <header id="header" class="sticky-header"></header>
   <div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
     <div class="mobile-nav-panel">
-      <nav><a href="./catalogo.html">Catálogo</a><a href="./biblioteca.html">Minha Biblioteca</a></nav>
+      <div class="mobile-logo">BIBLIO</div>
+      <nav>
+        <a href="./catalogo.html">Catálogo</a>
+        <a href="./biblioteca.html">Minha Biblioteca</a>
+        <div class="mobile-sep"></div>
+        <a href="./carrinho.html">Carrinho</a>
+      </nav>
+      <div class="mobile-user-section" id="mobile-user-section"></div>
     </div>
   </div>
 
@@ -20,104 +27,156 @@
   <script src="../js/data.js"></script>
   <script src="../js/app.js"></script>
   <script>
-    function render() {
-      const params = new URLSearchParams(location.search);
-      const id = params.get("id");
-      const book = getBook(id);
-      if (!book) { document.getElementById("main").innerHTML = `<div class="container py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
-      const author = getAuthor(book.authorId);
-      const publisher = getPublisher(book.publisherId);
-      const related = books.filter(b => b.id !== book.id && b.genres.some(g => book.genres.includes(g))).slice(0, 4);
-      const onSale = !!book.oldPrice;
-      const canBuy = book.access !== "ler";
-      const canRead = book.access !== "comprar";
-      const ratingDist = [5,4,3,2,1].map(s => ({ s, pct: s === Math.round(book.rating) ? 60 : s === Math.round(book.rating)-1 ? 25 : 5 }));
+    let currentBookId = null;
+    let currentAvgRating = 0;
+    let currentTotalRating = 0;
+    let currentUserRating = 0;
+    let hoverRating = 0;
 
-      document.getElementById("main").innerHTML = `
-        <div class="grid md-grid-cols-2" style="gap:2.5rem;">
-          <div><img src="${book.cover}" alt="${book.title}" style="width:100%;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
-          <div>
-            <h1 class="font-display text-4xl font-bold">${book.title}</h1>
-            <div class="mt-2 text-muted">por <a href="./catalogo.html?author=${book.authorId}" class="text-primary" style="text-decoration:underline;">${author?.name}</a> · ${publisher?.name}</div>
-            <div class="mt-3 flex items-center gap-2">
-              ${ratingStarsHTML(book.rating, 18)}
-              <span class="text-sm text-muted">${book.rating.toFixed(1)} · ${book.reviewsCount} avaliações</span>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              ${canBuy ? `<span class="badge">Comprável</span>` : ""}
-              ${canRead ? `<span class="badge">Legível no Site</span>` : ""}
-            </div>
-            <div class="mt-6 flex items-center gap-4">
-              ${canBuy ? `
-                ${onSale ? `<span class="text-lg text-muted line-through">${formatAOA(book.oldPrice)}</span>` : ""}
-                <span class="text-3xl font-bold text-primary">${formatAOA(book.price)}</span>
-              ` : ""}
-            </div>
-            <div class="mt-6 flex flex-wrap gap-3">
-              ${canBuy ? `<button class="btn btn-lg" onclick="cartAdd('${book.id}'); toast('Adicionado ao carrinho'); renderNavbar();"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Comprar Agora</button>` : ""}
-              ${canRead ? `<a href="./leitor.html?id=${book.id}" class="btn btn-lg btn-outline"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Ler no Site</a>` : ""}
-              <button class="btn btn-lg btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
-            </div>
-
-            <div class="card card-p-5 mt-8">
-              <h3 class="mb-3 font-semibold">Detalhes</h3>
-              <dl class="grid sm-grid-cols-2" style="gap:0.5rem;font-size:0.875rem;">
-                <div><dt class="text-muted">ISBN</dt><dd>${book.isbn}</dd></div>
-                <div><dt class="text-muted">Idioma</dt><dd>${book.language}</dd></div>
-                <div><dt class="text-muted">Páginas</dt><dd>${book.pages}</dd></div>
-                <div><dt class="text-muted">Ano</dt><dd>${book.year}</dd></div>
-              </dl>
-              <div class="mt-4 flex flex-wrap gap-2">
-                ${book.genres.map(g => `<span class="badge badge-outline">${g}</span>`).join("")}
-                ${book.tags.map(t => `<span class="badge badge-outline text-muted">#${t}</span>`).join("")}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <section class="mt-12">
-          <h2 class="font-display text-2xl font-bold section-title-underline">Sinopse</h2>
-          <p class="mt-4 text-muted" id="synopsis">${book.synopsis}${book.synopsis}${book.synopsis}${book.synopsis}</p>
-          <button class="btn btn-ghost" style="padding-left:0;" onclick="toggleSynopsis()">Ler mais</button>
-        </section>
-
-        <section class="mt-12">
-          <h2 class="font-display text-2xl font-bold section-title-underline">Avaliações</h2>
-          <div class="grid md-grid-cols-260 mt-6" style="gap:2rem;">
-            <div>
-              <div class="font-display text-5xl font-bold">${book.rating.toFixed(1)}</div>
-              ${ratingStarsHTML(book.rating, 20)}
-              <div class="mt-1 text-sm text-muted">${book.reviewsCount} avaliações</div>
-              <div class="mt-4 space-y-1">
-                ${ratingDist.map(r => `<div class="flex items-center gap-2 text-xs"><span>${r.s}★</span><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;"><div style="width:${r.pct}%;height:100%;background:var(--primary);"></div></div></div>`).join("")}
-              </div>
-            </div>
-            <div class="space-y-4">
-              ${book.reviews.map(r => `
-                <div class="card p-4">
-                  <div class="flex items-center justify-between">
-                    <div class="font-medium">${r.user}</div>
-                    <span class="text-xs text-muted">${formatDate(r.date)}</span>
-                  </div>
-                  ${ratingStarsHTML(r.rating)}
-                  <p class="mt-2 text-sm text-muted">${r.comment}</p>
-                </div>
-              `).join("")}
-            </div>
-          </div>
-        </section>
-
-        <section class="mt-12">
-          <h2 class="font-display text-2xl font-bold section-title-underline">Livros Relacionados</h2>
-          <div class="grid grid-cols-2 sm-grid-cols-3 lg-grid-cols-4 mt-6" style="gap:1.25rem;">${related.map(b => bookCardHTML(b)).join("")}</div>
-        </section>
-      `;
+    function starSVG(size, filled) {
+        const color = filled ? '#c2410c' : '#d1d5db';
+        const fillVal = filled ? '#c2410c' : 'none';
+        return `<svg style="width:${size}px;height:${size}px;cursor:pointer;display:block;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${fillVal}" stroke="${color}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
     }
 
-    function toggleSynopsis() {
-      const el = document.getElementById("synopsis");
-      if (el.classList.contains("line-clamp-4")) el.classList.remove("line-clamp-4");
-      else el.classList.add("line-clamp-4");
+    function renderStars() {
+        const container = document.getElementById('stars-container');
+        if (!container) return;
+        const display = hoverRating || currentUserRating || Math.round(currentAvgRating);
+        let html = '<div class="flex items-center gap-1" style="margin-top:0.5rem;">';
+        for (let i = 1; i <= 5; i++) {
+            const filled = i <= display;
+            html += `<span data-star="${i}" style="padding:2px;cursor:pointer;" onclick="submitRating(${i})" onmouseenter="hoverStar(${i})" onmouseleave="unhoverStar()">${starSVG(28, filled)}</span>`;
+        }
+        html += `<span id="rating-label" class="text-sm text-muted" style="margin-left:0.5rem;">${currentAvgRating > 0 ? currentAvgRating.toFixed(1) : 'Sem avaliação'} (${currentTotalRating} ${currentTotalRating === 1 ? 'avaliação' : 'avaliações'})</span>`;
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function hoverStar(val) {
+        hoverRating = val;
+        updateStarVisual(val);
+    }
+
+    function unhoverStar() {
+        hoverRating = 0;
+        updateStarVisual(currentUserRating || Math.round(currentAvgRating));
+    }
+
+    function updateStarVisual(display) {
+        const container = document.getElementById('stars-container');
+        if (!container) return;
+        const spans = container.querySelectorAll('[data-star]');
+        spans.forEach(s => {
+            const val = parseInt(s.dataset.star);
+            s.innerHTML = starSVG(28, val <= display);
+        });
+    }
+
+    let isSubmitting = false;
+
+    async function submitRating(nota) {
+        if (isSubmitting) return;
+        if (!currentUser) { toast('Faça login para avaliar', 'error'); return; }
+        isSubmitting = true;
+        const userId = currentUser.id || currentUser.user_id;
+        if (!userId) { toast('Erro: ID do utilizador não encontrado. Faça login novamente.', 'error'); isSubmitting = false; return; }
+        try {
+            const res = await fetch(`${API_URL}/livro/avaliar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'include',
+                body: JSON.stringify({ livro_id: currentBookId, nota, user_id: userId })
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                currentUserRating = data.user_nota;
+                currentAvgRating = data.media;
+                currentTotalRating = data.total;
+                hoverRating = 0;
+                renderStars();
+                toast('Avaliação registada!');
+            } else {
+                toast(data.mensagem || data.erro || 'Erro ao avaliar', 'error');
+            }
+        } catch (err) {
+            toast('Erro ao avaliar', 'error');
+        }
+        isSubmitting = false;
+    }
+
+    async function render() {
+        const params = new URLSearchParams(location.search);
+        const livroId = params.get("id");
+        if (!livroId) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
+
+        try {
+            const userId = currentUser ? (currentUser.id || currentUser.user_id) : '';
+            const url = `${API_URL}/livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`;
+            const res = await fetch(url, { credentials: 'include' });
+            if (!res.ok) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
+            const data = await res.json();
+            const book = data.dados;
+            currentBookId = book.id;
+            currentUserRating = book.user_rating || 0;
+            currentAvgRating = book.rating_media || 0;
+            currentTotalRating = book.rating_total || 0;
+            const tags = book.tags || [];
+            const generos = book.generos || [];
+
+            const authorName = book.autor || getAuthor(book.autor_id)?.name || 'Autor Desconhecido';
+            const publisherName = book.editora || getPublisher(book.editora_id)?.nome || 'Editora Desconhecida';
+            const canRead = book.legivel_no_site && book.caminho_pdf;
+            const canBuy = book.compravel;
+
+            document.getElementById("main").innerHTML = `
+              <div class="grid md-grid-cols-2" style="gap:2.5rem;">
+                <div><img src="${book.cover}" alt="${book.titulo}" style="width:100%;max-width:360px;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+                <div>
+                  <h1 class="font-display text-4xl font-bold">${book.titulo}</h1>
+                  <div class="mt-2 text-muted">por <a href="./catalogo.html" class="text-primary" style="text-decoration:underline;">${authorName}</a> · ${publisherName}</div>
+                  <div id="stars-container"></div>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    ${canBuy ? `<span class="badge">Comprável</span>` : ""}
+                    ${canRead ? `<span class="badge">Legível no Site</span>` : ""}
+                    ${generos.map(g => `<span class="badge" style="background:white;color:black;border:1px solid var(--ds-border);">${g}</span>`).join('')}
+                    ${tags.map(t => `<span class="badge" style="background:var(--ds-bg);color:var(--ds-text);border:1px solid var(--ds-border);">${t}</span>`).join('')}
+                  </div>
+                  <div class="mt-6 flex items-center gap-4">
+                    ${canBuy ? `<span class="text-3xl font-bold text-primary">${formatAOA(book.preco)}</span>` : ""}
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-3">
+                    ${canBuy ? `<button class="btn btn-lg" onclick="cartAdd('${book.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> Adicionar ao carrinho</button>` : ""}
+                    ${canRead ? `<button class="btn btn-lg btn-outline" onclick="handleLerLivro('${book.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Ler no Site</button>` : ""}
+                  </div>
+                  <div class="card card-p-5 mt-8">
+                    <h3 class="mb-3 font-semibold">Detalhes</h3>
+                    <dl class="grid sm-grid-cols-2" style="gap:0.5rem;font-size:0.875rem;">
+                      ${book.isbn ? `<div><dt class="text-muted">ISBN</dt><dd>${book.isbn}</dd></div>` : ''}
+                      ${book.idioma ? `<div><dt class="text-muted">Idioma</dt><dd>${book.idioma}</dd></div>` : ''}
+                      ${book.numero_paginas ? `<div><dt class="text-muted">Páginas</dt><dd>${book.numero_paginas}</dd></div>` : ''}
+                      ${book.ano_publicacao ? `<div><dt class="text-muted">Ano</dt><dd>${book.ano_publicacao}</dd></div>` : ''}
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              ${book.sinopse ? `
+              <section class="mt-12">
+                <h2 class="font-display text-2xl font-bold section-title-underline">Sinopse</h2>
+                <p class="mt-4 text-muted">${book.sinopse}</p>
+              </section>` : ''}
+            `;
+
+            renderStars();
+        } catch (err) {
+            document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Erro ao carregar</h1><p class="text-muted mt-2">Verifique a sua ligação.</p></div>`;
+        }
+    }
+
+    async function handleLerLivro(livroId) {
+      if (!currentUser) { window.location.href = "./login.html"; return; }
+      await registarLeitura(livroId);
+      window.location.href = `./leitor.html?id=${livroId}`;
     }
 
     document.addEventListener("DOMContentLoaded", render);
