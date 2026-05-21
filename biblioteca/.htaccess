@@ -13,12 +13,23 @@
     </IfModule>
 </Files>
 
+# CORS Headers para GitHub Pages
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "https://mraiken007.github.io"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    Header set Access-Control-Allow-Credentials "true"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
 # Ativar rewrite URL
 RewriteEngine On
 
 # Lidar com preflight OPTIONS imediatamente
 RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ - [R=200,L]
+RewriteRule ^(.*)$ - [R=204,L]
 
 # Redirecionar todas as requisições para index.php
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -27,10 +38,3 @@ RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
 
 # Desativar listagem de diretórios
 Options -Indexes
-
-# Configurações de segurança
-<IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set X-XSS-Protection "1; mode=block"
-</IfModule>
