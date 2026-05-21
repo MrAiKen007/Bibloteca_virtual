@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<header id="header" class="sticky-header"></header>
+<div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+<div class="mobile-nav-panel">
+  <div class="mobile-logo">BIBLIO</div>
+  <nav>
+    <a href="./catalogo.html">Catálogo</a>
+    <a href="./biblioteca.html">Minha Biblioteca</a>
+    <div class="mobile-sep"></div>
+    <a href="./carrinho.html">Carrinho</a>
+  </nav>
+  <div class="mobile-user-section" id="mobile-user-section"></div>
+</div>
+</div>
+<main class="container py-10" id="main"></main>
+<footer id="footer"></footer>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+let method = "multicaixa";
+let processing = false;
+
+function render(){
+    const el = document.getElementById("main");
+    if (cartItems.length === 0) {
+        el.innerHTML = `<div class="text-center py-20"><svg class="mx-auto text-muted" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><h1 class="mt-4 font-display text-3xl">Nenhum item para pagar</h1><a href="./carrinho.html" class="btn mt-6">Ver Carrinho</a></div>`;
+        return;
+    }
+
+    el.innerHTML = `
+    <div class="grid" style="gap:2rem;grid-template-columns:1fr 360px;">
+        <div>
+            <h1 class="mb-6 font-display text-3xl font-bold">Pagamento</h1>
+            <div class="card card-p-5">
+                <h3 class="mb-4 font-semibold">Método de pagamento</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 rounded border p-3 cursor-pointer ${method==='multicaixa'?'border-primary bg-primary/5':''}">
+                        <input type="radio" name="pay" value="multicaixa" ${method==='multicaixa'?'checked':''} onchange="method='multicaixa';render()">
+                        <div>
+                            <div class="font-medium">Multicaixa Express</div>
+                            <div class="text-xs text-muted">Pague com o número de celular</div>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 rounded border p-3 cursor-pointer ${method==='referencia'?'border-primary bg-primary/5':''}">
+                        <input type="radio" name="pay" value="referencia" ${method==='referencia'?'checked':''} onchange="method='referencia';render()">
+                        <div>
+                            <div class="font-medium">Referência Multicaixa</div>
+                            <div class="text-xs text-muted">Entidade + Referência + Valor</div>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 rounded border p-3 cursor-pointer ${method==='celular'?'border-primary bg-primary/5':''}">
+                        <input type="radio" name="pay" value="celular" ${method==='celular'?'checked':''} onchange="method='celular';render()">
+                        <div>
+                            <div class="font-medium">Número de celular</div>
+                            <div class="text-xs text-muted">Receba a notificação no telemóvel</div>
+                        </div>
+                    </label>
+                </div>
+
+                ${method === 'multicaixa' ? `
+                <div class="mt-5">
+                    <label class="label">Número de celular (Multicaixa Express)</label>
+                    <input class="input" id="mc-phone" placeholder="9XX XXX XXX" maxlength="12">
+                    <p class="text-xs text-muted mt-2">Receberá uma notificação no Multicaixa Express para confirmar o pagamento.</p>
+                </div>` : method === 'referencia' ? `
+                <div class="mt-5 p-4 rounded bg-secondary/10 border">
+                    <p class="text-sm font-medium mb-3">Após confirmar, receberá os dados:</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-muted">Entidade:</span><span class="font-mono">00000</span></div>
+                        <div class="flex justify-between"><span class="text-muted">Referência:</span><span class="font-mono">000 000 000</span></div>
+                        <div class="flex justify-between"><span class="text-muted">Valor:</span><span class="font-bold text-primary">${formatAOA(cartSubtotal())}</span></div>
+                    </div>
+                    <p class="text-xs text-muted mt-3">Pague em qualquer ATM ou Internet Banking.</p>
+                </div>` : `
+                <div class="mt-5">
+                    <label class="label">Número de celular</label>
+                    <input class="input" id="phone-number" placeholder="9XX XXX XXX" maxlength="12">
+                    <p class="text-xs text-muted mt-2">Receberá uma notificação SMS para confirmar o pagamento.</p>
+                </div>`}
+            </div>
+        </div>
+
+        <div class="card h-fit card-p-5">
+            <h3 class="font-semibold">Resumo do pedido</h3>
+            <div class="mt-3 space-y-2 text-sm">
+                ${cartItems.map(i => {
+                    const b = getBook(i.bookId);
+                    return b ? `<div class="flex justify-between"><span class="truncate" style="padding-right:0.5rem;">${b.title}</span><span>${formatAOA(b.price)}</span></div>` : "";
+                }).join("")}
+            </div>
+            <div class="mt-3 flex justify-between border-t pt-3 font-semibold">
+                <span>Total</span>
+                <span class="text-primary">${formatAOA(cartSubtotal())}</span>
+            </div>
+            <button class="btn btn-w-full mt-5" id="pay-btn" onclick="processPayment()" ${processing ? 'disabled' : ''}>
+                ${processing ? 'A processar...' : 'Confirmar Pagamento'}
+            </button>
+            <a href="./carrinho.html" class="btn btn-ghost btn-w-full mt-2" style="text-align:center;">Voltar ao carrinho</a>
+        </div>
+    </div>`;
+}
+
+async function processPayment() {
+    if (processing) return;
+
+    if (method === 'multicaixa') {
+        const phone = document.getElementById('mc-phone')?.value?.replace(/\s/g, '');
+        if (!phone || phone.length < 9) { toast("Número de celular inválido", "error"); return; }
+    } else if (method === 'celular') {
+        const phone = document.getElementById('phone-number')?.value?.replace(/\s/g, '');
+        if (!phone || phone.length < 9) { toast("Número de celular inválido", "error"); return; }
+    }
+
+    processing = true;
+    const btn = document.getElementById('pay-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'A processar...'; }
+
+    const ok = await checkoutCart();
+
+    processing = false;
+
+    if (ok) {
+        window.location.href = "./sucesso.html";
+    } else {
+        if (btn) { btn.disabled = false; btn.textContent = 'Confirmar Pagamento'; }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", render);
+</script>
+</body>
+</html>

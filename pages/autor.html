@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autor — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<header id="header" class="sticky-header"></header>
+<div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+<div class="mobile-nav-panel">
+  <div class="mobile-logo">BIBLIO</div>
+  <nav>
+    <a href="./catalogo.html">Catálogo</a>
+    <a href="./biblioteca.html">Minha Biblioteca</a>
+    <div class="mobile-sep"></div>
+    <a href="./carrinho.html">Carrinho</a>
+  </nav>
+  <div class="mobile-user-section" id="mobile-user-section"></div>
+</div>
+</div>
+<main class="container py-10" id="main"></main>
+<footer id="footer"></footer>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+function render(){
+const params=new URLSearchParams(location.search);
+const id=params.get("id");
+const author=getAuthor(id);
+if(!author){document.getElementById("main").innerHTML=`<div class="container py-20 text-center"><h1 class="text-2xl">Autor não encontrado</h1></div>`;return;}
+const authorBooks=books.filter(b=>b.authorId===id&&b.status==="publicado");
+document.getElementById("main").innerHTML=`<div class="flex items-center gap-6 mb-8"><img src="${author.photo}" class="rounded-full" style="width:120px;height:120px;object-fit:cover;" onerror="this.style.display='none'" alt=""><div><h1 class="font-display text-4xl font-bold">${author.name}</h1><p class="text-muted mt-2">${author.bio}</p></div></div><h2 class="font-display text-2xl font-bold section-title-underline">Livros</h2><div class="grid grid-cols-2 sm-grid-cols-3 lg-grid-cols-4 mt-6" style="gap:1.25rem;">${authorBooks.map(b=>bookCardHTML(b)).join("")}</div>`;
+}
+document.addEventListener("DOMContentLoaded",render);
+</script>
+</body>
+</html>

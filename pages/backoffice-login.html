@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acesso Backoffice — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+<div class="auth-page">
+<div class="card auth-card">
+<a href="./catalogo.html" class="block text-center font-display text-3xl font-bold tracking-wider">BIBLIO</a>
+<h1 class="mt-6 text-center text-2xl font-display">Acesso Backoffice</h1>
+<p class="mt-1 text-center text-sm text-muted">Use as credenciais de administrador ou backoffice.</p>
+<form id="form" class="mt-6 space-y-4">
+<div><label class="label">E-mail</label><input type="email" class="input" id="email" required></div>
+<div><label class="label">Palavra-passe</label><input type="password" class="input" id="pwd" required></div>
+<button type="submit" class="btn btn-w-full">Entrar</button>
+<p class="text-center text-sm text-muted"><a href="./login.html" class="text-primary" style="text-decoration:underline;">Acesso cliente</a></p>
+</form>
+</div>
+</div>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+document.getElementById("form").addEventListener("submit",function(e){
+e.preventDefault();
+const u=login(document.getElementById("email").value,document.getElementById("pwd").value);
+toast("Bem-vindo, "+u.name);
+if(u.role==="admin")location.href="./admin/dashboard.html";
+else if(u.role==="backoffice")location.href="./backoffice/dashboard.html";
+else{toast("Acesso negado","error");logout();}
+});
+</script>
+</body>
+</html>

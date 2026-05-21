@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — BIBLIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/styles.css">
+<style>
+  :root {
+    --ds-primary: #e84848;
+    --ds-primary-hover: #c93535;
+    --ds-primary-subtle: oklch(0.93 0.02 25);
+    --ds-bg: #f6f5f4;
+    --ds-text: #1a1a1a;
+    --ds-text-muted: #7a7a7a;
+    --ds-border: #e5e3e0;
+    --ds-white: #ffffff;
+    --ds-sidebar: #1a1a1a;
+    --ds-sidebar-text: #f2f2f2;
+    --ds-font-serif: 'Playfair Display', serif;
+    --ds-font-sans: 'Inter', sans-serif;
+    --ds-green: oklch(0.62 0.14 145);
+    --ds-green-subtle: oklch(0.94 0.025 145);
+    --ds-amber: oklch(0.78 0.14 75);
+    --ds-amber-subtle: oklch(0.95 0.025 75);
+  }
+
+  body { background-color: var(--ds-bg); color: var(--ds-text); font-family: var(--ds-font-sans); -webkit-font-smoothing: antialiased; }
+
+  .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  .sidebar { background: var(--ds-sidebar); padding: 1.75rem 0.875rem; display: flex; flex-direction: column; color: var(--ds-sidebar-text); position: sticky; top: 0; height: 100vh; }
+  .sidebar-header { display: flex; align-items: center; gap: 0.625rem; padding: 0 0.75rem 2rem; }
+  .sidebar-logo { font-family: var(--ds-font-serif); font-weight: 700; letter-spacing: 0.06em; font-size: 1.125rem; color: #ffffff; }
+  .sidebar-nav a { display: flex; align-items: center; gap: 0.625rem; padding: 0.625rem 0.75rem; border-radius: 6px; color: #ffffff; font-weight: 500; text-decoration: none; transition: all 0.15s; margin-bottom: 0.125rem; font-size: 0.8125rem; }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #ffffff; }
+  .sidebar-nav a.active { background: rgba(232,72,72,0.12); color: var(--ds-primary); }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); }
+
+  .main-content { padding: 2.5rem 3rem; max-width: 1200px; }
+
+  .page-header { margin-bottom: 2.5rem; }
+  .page-header h1 { font-family: var(--ds-font-serif); font-size: 1.75rem; font-weight: 800; margin-bottom: 0.375rem; }
+  .page-header p { color: var(--ds-text-muted); font-size: 0.875rem; }
+
+  .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+
+  .metric { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; padding: 1.25rem 1.5rem; position: relative; overflow: hidden; }
+  .metric-label { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); margin-bottom: 0.625rem; }
+  .metric-value { font-family: var(--ds-font-serif); font-size: 1.875rem; font-weight: 700; line-height: 1; }
+  .metric-context { font-size: 0.75rem; color: var(--ds-text-muted); margin-top: 0.5rem; }
+
+  .section { margin-bottom: 2rem; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+  .section-header h2 { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 700; }
+  .section-header a { font-size: 0.8125rem; font-weight: 600; color: var(--ds-primary); text-decoration: none; }
+  .section-header a:hover { text-decoration: underline; }
+
+  .card { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; overflow: hidden; }
+
+  .activity-table { width: 100%; border-collapse: collapse; }
+  .activity-table th { text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); }
+  .activity-table td { padding: 0.875rem 1.25rem; font-size: 0.8125rem; border-bottom: 1px solid var(--ds-border); vertical-align: middle; }
+  .activity-table tr:last-child td { border-bottom: none; }
+  .activity-table tr:hover td { background: oklch(0.985 0.003 75); }
+
+  .action-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .action-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.15s; border: 1px solid var(--ds-border); background: var(--ds-white); color: var(--ds-text); }
+  .action-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+  .action-btn.primary { background: var(--ds-primary); color: white; border-color: var(--ds-primary); }
+  .action-btn.primary:hover { background: var(--ds-primary-hover); }
+
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.375rem; }
+  .status-dot.green { background: var(--ds-green); }
+  .status-dot.amber { background: var(--ds-amber); }
+
+  .badge { display: inline-flex; align-items: center; padding: 0.1875rem 0.5rem; border-radius: 4px; font-size: 0.6875rem; font-weight: 600; }
+  .badge.green { background: var(--ds-green-subtle); color: var(--ds-green); }
+  .badge.amber { background: var(--ds-amber-subtle); color: var(--ds-amber); }
+  .badge.red { background: var(--ds-primary-subtle); color: var(--ds-primary); }
+
+  .mobile-header { display: none; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--ds-white); border-bottom: 1px solid var(--ds-border); position: sticky; top: 0; z-index: 40; }
+  .mobile-header .logo { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 800; letter-spacing: 0.08em; }
+  .mobile-toggle { width: 36px; height: 36px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .mobile-toggle svg { width: 20px; height: 20px; }
+  .mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 49; display: none; }
+  .mobile-overlay.open { display: block; }
+
+  @media (max-width: 900px) {
+    .main-content { padding: 1.5rem; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; z-index: 50; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-header { display: flex; }
+    .main-content { padding: 1rem; }
+    .page-header h1 { font-size: 1.375rem; }
+    .metrics-row { grid-template-columns: 1fr; }
+    .metric { padding: 1rem; }
+    .metric-value { font-size: 1.5rem; }
+    .action-row { flex-direction: column; }
+    .action-btn { justify-content: center; }
+    .activity-table { font-size: 0.75rem; }
+    .activity-table th, .activity-table td { padding: 0.625rem 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mobile-header">
+  <span class="logo">BIBLIO</span>
+  <button class="mobile-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+  </button>
+</div>
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+<div class="admin-layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ds-primary)" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <div class="sidebar-logo">BIBLIO</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="./dashboard.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+    <a href="./utilizadores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Utilizadores</a>
+    <a href="./relatorios.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg> Relatórios</a>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-footer"></div>
+</aside>
+
+<main class="main-content">
+  <div class="page-header">
+    <h1>Centro de Comando</h1>
+    <p id="greeting">Bem-vindo, <span id="user-name">Administrador</span>.</p>
+  </div>
+
+  <div class="action-row">
+    <a href="./criar-utilizador.html" class="action-btn primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7v14"/></svg>
+      Nova Conta Backoffice
+    </a>
+    <a href="./utilizadores.html" class="action-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Gerir Utilizadores
+    </a>
+    <a href="./relatorios.html" class="action-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+      Ver Relatórios
+    </a>
+  </div>
+
+  <section class="metrics-row">
+    <div class="metric">
+      <div class="metric-label">Utilizadores</div>
+      <div id="stat-users" class="metric-value">-</div>
+      <div class="metric-context" id="stat-users-context"></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Clientes Ativos</div>
+      <div id="stat-active" class="metric-value">-</div>
+      <div class="metric-context" id="stat-active-context"></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Vendas Totais</div>
+      <div id="stat-sales" class="metric-value">-</div>
+      <div class="metric-context" id="stat-sales-context"></div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Contas Pendentes</div>
+      <div id="stat-pending" class="metric-value">-</div>
+      <div class="metric-context" id="stat-pending-context"></div>
+    </div>
+  </section>
+
+  <div class="section">
+    <div class="section-header">
+      <h2>Atividade Recente</h2>
+    </div>
+    <div class="card">
+      <div id="activity-list">
+        <div class="p-12 text-center text-ds-text-muted">A carregar logs de atividade...</div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="../../js/data.js"></script>
+<script src="../../js/app.js"></script>
+<script>
+function toggleMobileSidebar(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('mobile-overlay').classList.toggle('open');
+}
+
+function renderSidebar(){
+    const el=document.getElementById("sidebar-footer");
+    if(!el)return;
+    el.innerHTML=`<div style="padding:0.75rem"><div class="flex items-center gap-2.5 mb-3"><div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(242,242,242,0.6)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="overflow-hidden"><div class="text-xs font-bold truncate" style="color:#ffffff">${currentUser?.name||'Admin'}</div><div class="text-xs truncate" style="color:rgba(255,255,255,0.5)">${currentUser?.email||''}</div></div></div><button onclick="logout()" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-md bg-red-950 text-red-400 text-xs font-bold uppercase tracking-wider hover:bg-red-900 transition border border-red-900"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Sair</button></div>`;
+}
+
+function render(){
+    if(!currentUser) return;
+    document.getElementById("user-name").innerText = currentUser.name;
+    const clientes = users.filter(u => u.role === "cliente");
+    const clientesAtivos = clientes.filter(u => u.active).length;
+    const pendentes = users.filter(u => u.role === "backoffice" && !u.active);
+    const totalVendas = orders.reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
+
+    document.getElementById("stat-users").innerText = users.length;
+    document.getElementById("stat-users-context").innerHTML = `<span class="status-dot green"></span>${clientes.length} clientes, ${users.filter(u=>u.role==='backoffice').length} backoffice`;
+
+    document.getElementById("stat-active").innerText = clientesAtivos;
+    document.getElementById("stat-active-context").innerHTML = clientes.length > 0 ? `${Math.round((clientesAtivos/clientes.length)*100)}% do total` : 'Sem clientes';
+
+    document.getElementById("stat-sales").innerText = formatAOA(totalVendas);
+    document.getElementById("stat-sales-context").innerHTML = `${orders.length} pedido${orders.length !== 1 ? 's' : ''} registado${orders.length !== 1 ? 's' : ''}`;
+
+    const pendingEl = document.getElementById("stat-pending");
+    pendingEl.innerText = pendentes.length;
+    pendingEl.style.color = pendentes.length > 0 ? 'var(--ds-amber)' : 'var(--ds-green)';
+    document.getElementById("stat-pending-context").innerHTML = pendentes.length > 0 ? `<span class="status-dot amber"></span>Requerem aprovação` : `<span class="status-dot green"></span>Tudo em ordem`;
+}
+
+async function loadActivity(){
+    const el = document.getElementById("activity-list");
+    try {
+        const res = await fetch(`${API_URL}/auditoria`, { credentials: 'include' });
+        const data = await res.json();
+        const logs = data.dados || [];
+
+        if (logs.length === 0) {
+            el.innerHTML = '<div class="p-12 text-center text-ds-text-muted">Nenhuma atividade registada.</div>';
+            return;
+        }
+
+        const actionBadge = (acao) => {
+            if (acao === 'login') return '<span class="badge green">login</span>';
+            if (acao === 'criar') return '<span class="badge amber">criar</span>';
+            if (acao === 'atualizar') return '<span class="badge amber">atualizar</span>';
+            if (acao === 'avaliar') return '<span class="badge red">avaliar</span>';
+            return `<span class="badge">${acao}</span>`;
+        };
+
+        el.innerHTML = `
+            <table class="activity-table">
+                <thead><tr><th>Utilizador</th><th>Ação</th><th>Tabela</th><th>Data</th></tr></thead>
+                <tbody>
+                    ${logs.slice(0, 15).map(l => `
+                        <tr>
+                            <td>
+                                <div class="font-bold">${l.utilizador_nome || 'Sistema'}</div>
+                                <div class="text-ds-text-muted" style="font-size:0.6875rem;">${l.utilizador_email || ''}</div>
+                            </td>
+                            <td>${actionBadge(l.acao)}</td>
+                            <td class="text-ds-text-muted">${l.tabela_afetada || '-'}</td>
+                            <td class="text-ds-text-muted">${formatDate(l.criado_em)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (err) {
+        el.innerHTML = '<div class="p-12 text-center text-ds-text-muted">Erro ao carregar atividade.</div>';
+    }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+    renderSidebar();
+    render();
+    loadActivity();
+});
+</script>
+</body>
+</html>

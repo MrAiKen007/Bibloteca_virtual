@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Géneros & Tags — Backoffice — BIBLIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/styles.css">
+<style>
+  :root {
+    --ds-primary: #e84848; --ds-primary-hover: #c93535; --ds-primary-subtle: oklch(0.93 0.02 25);
+    --ds-bg: #f6f5f4; --ds-text: #1a1a1a; --ds-text-muted: #7a7a7a; --ds-border: #e5e3e0;
+    --ds-white: #ffffff; --ds-sidebar: #1a1a1a;
+    --ds-font-serif: 'Playfair Display', serif; --ds-font-sans: 'Inter', sans-serif;
+    --ds-green: oklch(0.62 0.14 145); --ds-green-subtle: oklch(0.94 0.025 145);
+    --ds-amber: oklch(0.78 0.14 75); --ds-amber-subtle: oklch(0.95 0.025 75);
+    --ds-blue: oklch(0.62 0.14 240); --ds-blue-subtle: oklch(0.94 0.025 240);
+  }
+  body { background: var(--ds-bg); color: var(--ds-text); font-family: var(--ds-font-sans); -webkit-font-smoothing: antialiased; }
+  .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--ds-sidebar); padding: 1.75rem 0.875rem; display: flex; flex-direction: column; color: var(--ds-sidebar-text); position: sticky; top: 0; height: 100vh; }
+  .sidebar-header { display: flex; align-items: center; gap: 0.625rem; padding: 0 0.75rem 2rem; }
+  .sidebar-logo { font-family: var(--ds-font-serif); font-weight: 700; letter-spacing: 0.06em; font-size: 1.125rem; color: #ffffff; }
+  .sidebar-nav a { display: flex; align-items: center; gap: 0.625rem; padding: 0.625rem 0.75rem; border-radius: 6px; color: #ffffff; font-weight: 500; text-decoration: none; transition: all 0.15s; margin-bottom: 0.125rem; font-size: 0.8125rem; }
+  .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #ffffff; }
+  .sidebar-nav a.active { background: rgba(232,72,72,0.12); color: var(--ds-primary); }
+  .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); }
+  .main-content { padding: 2.5rem 3rem; max-width: 1200px; }
+  .page-header { margin-bottom: 2rem; }
+  .page-header h1 { font-family: var(--ds-font-serif); font-size: 1.75rem; font-weight: 800; margin-bottom: 0.375rem; }
+  .page-header p { color: var(--ds-text-muted); font-size: 0.875rem; }
+  .taxo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .taxo-card { background: var(--ds-white); border: 1px solid var(--ds-border); border-radius: 8px; overflow: hidden; }
+  .taxo-card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--ds-border); background: var(--ds-bg); }
+  .taxo-card-title { font-family: var(--ds-font-serif); font-size: 1rem; font-weight: 700; }
+  .taxo-card-body { padding: 1.25rem; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .tag-item { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 6px; font-size: 0.75rem; font-weight: 500; border: 1px solid var(--ds-border); background: var(--ds-bg); color: var(--ds-text); transition: all 0.15s; }
+  .tag-item.genre { background: var(--ds-green-subtle); border-color: oklch(0.88 0.05 145); color: var(--ds-green); }
+  .tag-item.tag { background: var(--ds-blue-subtle); border-color: oklch(0.88 0.05 240); color: var(--ds-blue); }
+  .tag-remove { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 14px; line-height: 1; transition: all 0.15s; opacity: 0.6; }
+  .tag-remove:hover { opacity: 1; background: rgba(0,0,0,0.1); }
+  .action-btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; border-radius: 5px; font-size: 0.6875rem; font-weight: 600; border: 1px solid var(--ds-border); background: var(--ds-white); color: var(--ds-text); cursor: pointer; transition: all 0.15s; }
+  .action-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+  .action-btn.primary { background: var(--ds-primary); color: white; border-color: var(--ds-primary); }
+  .action-btn.primary:hover { background: var(--ds-primary-hover); }
+  .empty-state { text-align: center; padding: 2rem 0; color: var(--ds-text-muted); font-size: 0.8125rem; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--ds-white); border-radius: 10px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.75rem; border-bottom: 1px solid var(--ds-border); }
+  .modal-header h2 { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 700; }
+  .modal-close { width: 30px; height: 30px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ds-text-muted); transition: all 0.15s; }
+  .modal-close:hover { background: var(--ds-bg); color: var(--ds-text); }
+  .modal-body { padding: 1.75rem; }
+  .form-group { margin-bottom: 1.125rem; }
+  .form-label { display: block; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); margin-bottom: 0.375rem; }
+  .form-input { width: 100%; padding: 0.625rem 0.875rem; border-radius: 6px; border: 1px solid var(--ds-border); font-size: 0.8125rem; outline: none; transition: all 0.15s; font-family: var(--ds-font-sans); }
+  .form-input:focus { border-color: var(--ds-primary); box-shadow: 0 0 0 3px rgba(232,72,72,0.06); }
+  textarea.form-input { resize: vertical; min-height: 80px; }
+  .form-actions { display: flex; gap: 0.75rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid var(--ds-border); margin-top: 1.25rem; }
+  .btn-cancel { padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid var(--ds-border); background: transparent; color: var(--ds-text-muted); font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; }
+  .btn-cancel:hover { background: var(--ds-bg); color: var(--ds-text); }
+  .btn-save { padding: 0.5rem 1.25rem; border-radius: 6px; border: none; background: var(--ds-primary); color: white; font-weight: 600; font-size: 0.8125rem; cursor: pointer; transition: all 0.15s; }
+  .btn-save:hover { background: var(--ds-primary-hover); }
+  .mobile-header { display: none; align-items: center; justify-content: space-between; padding: 0.875rem 1rem; background: var(--ds-white); border-bottom: 1px solid var(--ds-border); position: sticky; top: 0; z-index: 40; }
+  .mobile-header .logo { font-family: var(--ds-font-serif); font-size: 1.125rem; font-weight: 800; letter-spacing: 0.08em; }
+  .mobile-toggle { width: 36px; height: 36px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .mobile-toggle svg { width: 20px; height: 20px; }
+  .mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 49; display: none; }
+  .mobile-overlay.open { display: block; }
+  @media (max-width: 900px) { .main-content { padding: 1.5rem; } .taxo-grid { gap: 1rem; } }
+  @media (max-width: 640px) {
+    .admin-layout { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; z-index: 50; transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-header { display: flex; }
+    .main-content { padding: 1rem; }
+    .page-header h1 { font-size: 1.375rem; }
+    .taxo-grid { grid-template-columns: 1fr; }
+    .modal { max-width: 100%; margin: 0.75rem; border-radius: 10px 10px 0 0; align-self: flex-end; }
+    .modal-header { padding: 1.125rem 1.25rem; }
+    .modal-body { padding: 1.25rem; }
+    .form-actions { flex-direction: column; }
+    .form-actions .btn-cancel, .form-actions .btn-save { width: 100%; text-align: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="mobile-header">
+  <span class="logo">BIBLIO</span>
+  <button class="mobile-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+  </button>
+</div>
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileSidebar()"></div>
+
+<div class="admin-layout">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ds-primary)" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <div class="sidebar-logo">BIBLIO</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="./dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard</a>
+    <a href="./livros.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg> Livros</a>
+    <a href="./autores.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Autores</a>
+    <a href="./editoras.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3l2-4h14l2 4"/></svg> Editoras</a>
+    <a href="./taxonomias.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2H2v10h10V2z"/><path d="M12 12H2v10h10V12z"/><path d="M22 2h-10v10h10V2z"/><path d="M22 12h-10v10h10V12z"/></svg> Géneros & Tags</a>
+  </nav>
+  <div class="sidebar-footer" id="sidebar-footer"></div>
+</aside>
+
+<main class="main-content">
+  <div class="page-header">
+    <h1>Géneros & Tags</h1>
+    <p>Organização taxonómica do catálogo da biblioteca.</p>
+  </div>
+
+  <div class="taxo-grid">
+    <div class="taxo-card">
+      <div class="taxo-card-header">
+        <h3 class="taxo-card-title">Géneros Literários</h3>
+        <button class="action-btn primary" onclick="openGenreModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7v14"/></svg>
+          Adicionar
+        </button>
+      </div>
+      <div class="taxo-card-body">
+        <div id="genres-container" class="tag-list"></div>
+      </div>
+    </div>
+
+    <div class="taxo-card">
+      <div class="taxo-card-header">
+        <h3 class="taxo-card-title">Tags & Etiquetas</h3>
+        <button class="action-btn primary" onclick="openTagModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7v14"/></svg>
+          Adicionar
+        </button>
+      </div>
+      <div class="taxo-card-body">
+        <div id="tags-container" class="tag-list"></div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="modal-overlay" id="genre-modal" onclick="if(event.target===this)closeGenreModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Novo Género</h2>
+      <button class="modal-close" onclick="closeGenreModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="genre-form" onsubmit="handleGenreSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Nome do Género *</label>
+          <input type="text" name="nome" class="form-input" required placeholder="Ex: Ficção Científica">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição</label>
+          <textarea name="descricao" class="form-input" placeholder="Breve descrição..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeGenreModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Género</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="tag-modal" onclick="if(event.target===this)closeTagModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Nova Tag</h2>
+      <button class="modal-close" onclick="closeTagModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="tag-form" onsubmit="handleTagSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Nome da Tag *</label>
+          <input type="text" name="nome" class="form-input" required placeholder="Ex: bestseller">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" onclick="closeTagModal()">Cancelar</button>
+          <button type="submit" class="btn-save">Guardar Tag</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../../js/data.js"></script>
+<script src="../../js/app.js"></script>
+<script>
+function toggleMobileSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('mobile-overlay').classList.toggle('open'); }
+function renderSidebar(){
+    const el=document.getElementById("sidebar-footer");
+    if(!el)return;
+    el.innerHTML=`<div style="padding:0.75rem"><div class="flex items-center gap-2.5 mb-3"><div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 flex-shrink-0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(242,242,242,0.6)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="overflow-hidden"><div class="text-xs font-bold truncate" style="color:#ffffff">${currentUser?.name||'Operador'}</div><div class="text-xs truncate" style="color:rgba(255,255,255,0.5)">${currentUser?.email||''}</div></div></div><button onclick="logout()" class="w-full flex items-center justify-center gap-1.5 p-2 rounded-md bg-red-950 text-red-400 text-xs font-bold uppercase tracking-wider hover:bg-red-900 transition border border-red-900"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Sair</button></div>`;
+}
+function openGenreModal(){ document.getElementById('genre-form').reset(); document.getElementById('genre-modal').classList.add('open'); }
+function closeGenreModal(){ document.getElementById('genre-modal').classList.remove('open'); }
+function openTagModal(){ document.getElementById('tag-form').reset(); document.getElementById('tag-modal').classList.add('open'); }
+function closeTagModal(){ document.getElementById('tag-modal').classList.remove('open'); }
+function handleGenreSubmit(e){
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const nome = formData.get('nome').trim();
+    if (!nome) return;
+    if (GENRES.includes(nome)) { toast('Este género já existe', 'error'); return; }
+    GENRES.push(nome);
+    toast('Género adicionado!');
+    closeGenreModal();
+    render();
+}
+function handleTagSubmit(e){
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const nome = formData.get('nome').trim().toLowerCase();
+    if (!nome) return;
+    if (TAGS.includes(nome)) { toast('Esta tag já existe', 'error'); return; }
+    TAGS.push(nome);
+    toast('Tag adicionada!');
+    closeTagModal();
+    render();
+}
+function removeGenre(idx){
+    if (!confirm(`Remover o género "${GENRES[idx]}"?`)) return;
+    GENRES.splice(idx, 1);
+    toast('Género removido');
+    render();
+}
+function removeTag(idx){
+    if (!confirm(`Remover a tag "${TAGS[idx]}"?`)) return;
+    TAGS.splice(idx, 1);
+    toast('Tag removida');
+    render();
+}
+function render(){
+    const genresEl = document.getElementById("genres-container");
+    if (GENRES.length === 0) {
+        genresEl.innerHTML = '<div class="empty-state">Nenhum género registado.</div>';
+    } else {
+        genresEl.innerHTML = GENRES.map((g, i) => `<span class="tag-item genre">${g}<button class="tag-remove" onclick="removeGenre(${i})" title="Remover">&times;</button></span>`).join("");
+    }
+    const tagsEl = document.getElementById("tags-container");
+    if (TAGS.length === 0) {
+        tagsEl.innerHTML = '<div class="empty-state">Nenhuma tag registada.</div>';
+    } else {
+        tagsEl.innerHTML = TAGS.map((t, i) => `<span class="tag-item tag">${t}<button class="tag-remove" onclick="removeTag(${i})" title="Remover">&times;</button></span>`).join("");
+    }
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+    renderSidebar();
+    render();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Biblioteca — BIBLIO</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <header id="header" class="sticky-header"></header>
+  <div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+    <div class="mobile-nav-panel">
+      <div class="mobile-logo">BIBLIO</div>
+      <nav>
+        <a href="./catalogo.html">Catálogo</a>
+        <a href="./biblioteca.html">Minha Biblioteca</a>
+        <div class="mobile-sep"></div>
+        <a href="./carrinho.html">Carrinho</a>
+      </nav>
+      <div class="mobile-user-section" id="mobile-user-section"></div>
+    </div>
+  </div>
+
+  <main class="container py-10">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <h1 class="font-display text-4xl font-bold section-title-underline">Minha Biblioteca</h1>
+      <div class="relative" style="width:18rem;">
+        <svg class="absolute text-muted" style="left:12px;top:50%;transform:translateY(-50%);" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" class="input" style="padding-left:36px;" placeholder="Pesquisar..." id="search-lib" oninput="renderLibrary()">
+      </div>
+    </div>
+    <div id="library-content" class="mt-8"></div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script src="../js/data.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    let meusLivros = [];
+
+    async function renderLibrary() {
+      if (meusLivros.length === 0) {
+        meusLivros = await fetchBiblioteca();
+      }
+      const q = document.getElementById("search-lib")?.value.toLowerCase() || "";
+      const items = meusLivros.filter(b => b.title.toLowerCase().includes(q));
+      const el = document.getElementById("library-content");
+
+      if (!currentUser) {
+        el.innerHTML = `<div class="card flex flex-col items-center gap-3 p-12 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <p class="text-muted">Faça login para ver a sua biblioteca.</p>
+          <a href="./login.html" class="btn">Iniciar sessão</a>
+        </div>`;
+        return;
+      }
+
+      if (items.length === 0) {
+        el.innerHTML = `<div class="card flex flex-col items-center gap-3 p-12 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <p class="text-muted">Ainda não tem livros comprados ou lidos.</p>
+          <a href="./catalogo.html" class="btn">Explorar catálogo</a>
+        </div>`;
+      } else {
+        el.innerHTML = `<div class="grid grid-cols-2 sm-grid-cols-3 lg-grid-cols-4" style="gap:1.25rem;">${items.map(b => `
+          <div class="card overflow-hidden p-0">
+            <img src="${b.cover}" alt="${b.title}" class="aspect-3-4 w-full object-cover" onerror="this.src='https://picsum.photos/seed/${b.id}/400/600'">
+            <div class="p-3">
+              <div class="line-clamp-1 font-medium">${b.title}</div>
+              <div class="text-xs text-muted">${b.author || getAuthor(b.authorId)?.name || ""}</div>
+              <div class="mt-1 flex items-center gap-1">
+                ${b.tipo_acesso === 'comprado'
+                  ? `<span class="badge" style="font-size:0.6875rem;padding:0.125rem 0.5rem;">Comprado</span>`
+                  : `<span class="badge badge-outline" style="font-size:0.6875rem;padding:0.125rem 0.5rem;">Lido</span>`}
+                ${b.rating > 0 ? `<span class="text-xs text-muted ml-auto">${ratingStarsHTML(b.rating, 12)} ${b.rating.toFixed(1)}</span>` : ''}
+              </div>
+              <a href="./leitor.html?id=${b.id}" class="btn btn-sm btn-w-full mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Ler Agora
+              </a>
+            </div>
+          </div>
+        `).join("")}</div>`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", renderLibrary);
+  </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil — BIBLIO</title>
+<link rel="stylesheet" href="../css/styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<header id="header" class="sticky-header"></header>
+<div class="mobile-nav" id="mobile-nav" onclick="if(event.target===this)toggleMobileMenu()">
+<div class="mobile-nav-panel">
+  <div class="mobile-logo">BIBLIO</div>
+  <nav>
+    <a href="./catalogo.html">Catálogo</a>
+    <a href="./biblioteca.html">Minha Biblioteca</a>
+    <div class="mobile-sep"></div>
+    <a href="./carrinho.html">Carrinho</a>
+  </nav>
+  <div class="mobile-user-section" id="mobile-user-section"></div>
+</div>
+</div>
+<main class="container py-10" id="main"></main>
+<footer id="footer"></footer>
+<script src="../js/data.js"></script>
+<script src="../js/app.js"></script>
+<script>
+function render(){
+    const user = currentUser;
+    if (!user) { location.href = "./login.html"; return; }
+    
+    // Mockup para pedidos já que ainda não temos na API
+    const myOrders = (typeof orders !== 'undefined') ? orders.filter(o => o.userId === user.id) : [];
+    
+    const userName = user.nome_completo || user.name || "Utilizador";
+    const userEmail = user.email || "";
+    const userAvatar = user.avatar || "";
+
+    document.getElementById("main").innerHTML = `
+        <div>
+            <h1 class="font-display text-4xl font-bold mb-8 section-title-underline">O meu Perfil</h1>
+            
+            <div class="grid lg-grid-cols-2" style="gap:2rem;">
+                <div class="card card-p-5">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-semibold text-lg">Dados Pessoais</h3>
+                        <span class="badge badge-primary uppercase">${user.papel || user.role || 'Cliente'}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-6 mb-8">
+                        <div class="w-24 h-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden border-2 border-primary">
+                            ${userAvatar ? `<img src="${userAvatar}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-muted"></i>`}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline">Alterar Foto</button>
+                            <p class="mt-2 text-xs text-muted">JPG ou PNG. Máximo 2MB.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label class="label">Nome Completo</label>
+                            <input class="input" id="p-name" value="${userName}">
+                        </div>
+                        <div class="form-group">
+                            <label class="label">E-mail</label>
+                            <input class="input" type="email" id="p-email" value="${userEmail}" disabled>
+                            <p class="text-xs text-muted mt-1">O e-mail não pode ser alterado.</p>
+                        </div>
+                        <button class="btn btn-w-full mt-4" onclick="toast('Alterações guardadas com sucesso!')">Guardar Alterações</button>
+                    </div>
+                </div>
+
+                <div class="card card-p-5">
+                    <h3 class="mb-6 font-semibold text-lg">Segurança</h3>
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label class="label">Palavra-passe Atual</label>
+                            <input type="password" class="input" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Nova Palavra-passe</label>
+                            <input type="password" class="input">
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Confirmar Nova Palavra-passe</label>
+                            <input type="password" class="input">
+                        </div>
+                        <button class="btn btn-outline btn-w-full mt-4" onclick="toast('Funcionalidade em desenvolvimento', 'error')">Atualizar Palavra-passe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-p-5 mt-8">
+                <h3 class="mb-6 font-semibold text-lg">Histórico de Pedidos</h3>
+                ${myOrders.length === 0 ? `
+                    <div class="py-10 text-center">
+                        <div class="text-muted mb-3"><i data-lucide="shopping-bag" class="w-12 h-12 mx-auto opacity-20"></i></div>
+                        <p class="text-muted">Ainda não realizou nenhum pedido.</p>
+                        <a href="./catalogo.html" class="text-primary text-sm font-medium hover:underline mt-2 inline-block">Começar a comprar</a>
+                    </div>
+                ` : `
+                    <div class="overflow-x-auto">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Livros</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${myOrders.map(o => `
+                                    <tr>
+                                        <td>${formatDate(o.date)}</td>
+                                        <td>${o.items.map(i => getBook(i.bookId)?.title).join(", ")}</td>
+                                        <td class="font-semibold">${formatAOA(o.total)}</td>
+                                        <td><span class="badge ${o.status === "pago" ? "badge-primary" : "badge-outline"}">${o.status}</span></td>
+                                    </tr>
+                                `).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+    
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+document.addEventListener("DOMContentLoaded",render);
+</script>
+</body>
+</html>
