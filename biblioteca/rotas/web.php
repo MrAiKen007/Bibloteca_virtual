@@ -89,6 +89,7 @@ $router->delete('api/livros/eliminar', ['LivroControlador', 'apiEliminar']);
 $router->post('api/livro/avaliar', ['LivroControlador', 'apiAvaliar']);
 
 $router->post('api/login', ['AutenticacaoControlador', 'apiAutenticar']);
+$router->post('api/logout', ['AutenticacaoControlador', 'apiLogout']);
 $router->post('api/registo', ['RegistoControlador', 'apiGuardar']);
 
 $router->get('api/autores', ['AutorControlador', 'apiListar']);

@@ -10,7 +10,67 @@ class Autorizacao
 
     public static function estaLogado()
     {
-        return isset($_SESSION['user_id']);
+        // Sessão normal
+        if (isset($_SESSION['user_id'])) return true;
+        
+        // Token (para CORS proxy sem cookies)
+        $token = self::getToken();
+        if ($token) {
+            $tokenData = self::verificarToken($token);
+            if ($tokenData) {
+                // Preencher sessão com dados do token
+                $_SESSION['user_id'] = $tokenData['user_id'];
+                $_SESSION['user_nome'] = $tokenData['user_nome'];
+                $_SESSION['user_papel'] = $tokenData['user_papel'];
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | OBTER TOKEN DO REQUEST
+    |--------------------------------------------------------------------------
+    */
+
+    private static function getToken()
+    {
+        // Header Authorization: Bearer <token>
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (preg_match('/Bearer\s+(.+)/i', $authHeader, $matches)) {
+            return $matches[1];
+        }
+        
+        // Body JSON
+        $input = json_decode(file_get_contents('php://input'), true);
+        if ($input && isset($input['token'])) {
+            return $input['token'];
+        }
+        
+        // Query param
+        return $_GET['token'] ?? null;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | VERIFICAR TOKEN
+    |--------------------------------------------------------------------------
+    */
+
+    private static function verificarToken($token)
+    {
+        $tokenFile = __DIR__ . '/../../tokens/' . $token . '.json';
+        if (!file_exists($tokenFile)) return null;
+        
+        $data = json_decode(file_get_contents($tokenFile), true);
+        if (!$data || $data['expira'] < time()) {
+            if (file_exists($tokenFile)) unlink($tokenFile);
+            return null;
+        }
+        
+        return $data;
     }
 
     /*

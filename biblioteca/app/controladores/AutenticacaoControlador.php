@@ -138,6 +138,25 @@ class AutenticacaoControlador
         $_SESSION['user_papel'] = $utilizador['papel'];
         session_regenerate_id(true);
 
+        // Gerar token para CORS proxy (sem cookies)
+        $token = bin2hex(random_bytes(32));
+        $tokenData = [
+            'user_id' => $utilizador['id'],
+            'user_nome' => $utilizador['nome_completo'],
+            'user_papel' => $utilizador['papel'],
+            'expira' => time() + 86400 // 24 horas
+        ];
+        // Guardar token em ficheiro simples (sem DB)
+        $tokenDir = __DIR__ . '/../../tokens';
+        if (!is_dir($tokenDir)) mkdir($tokenDir, 0755, true);
+        file_put_contents($tokenDir . '/' . $token . '.json', json_encode($tokenData));
+
+        // Limpar tokens expirados
+        foreach (glob($tokenDir . '/*.json') as $f) {
+            $d = json_decode(file_get_contents($f), true);
+            if ($d && $d['expira'] < time()) unlink($f);
+        }
+
         $db = BaseDados::getInstancia()->getConexao();
         $stmt = $db->prepare("INSERT INTO auditorias (utilizador_id, acao, tabela_afetada) VALUES (:user, 'login', 'utilizadores')");
         $stmt->execute([':user' => $utilizador['id']]);
@@ -150,7 +169,20 @@ class AutenticacaoControlador
             'role' => $utilizador['papel'],
             'papel' => $utilizador['papel'],
             'active' => (bool)$utilizador['ativo'],
-            'ativo' => (bool)$utilizador['ativo']
+            'ativo' => (bool)$utilizador['ativo'],
+            'token' => $token
         ]);
+    }
+
+    public function apiLogout()
+    {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $token = $input['token'] ?? '';
+        if ($token) {
+            $tokenFile = __DIR__ . '/../../tokens/' . $token . '.json';
+            if (file_exists($tokenFile)) unlink($tokenFile);
+        }
+        session_destroy();
+        Resposta::json(['mensagem' => 'Sessão terminada']);
     }
 }
