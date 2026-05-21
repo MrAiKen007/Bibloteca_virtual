@@ -1,11 +1,15 @@
-const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://biblioipil.infinityfreeapp.com/index.php?url=api");
+const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
+const PROXY = "https://corsproxy.io/?";
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
     const token = localStorage.getItem('biblio_token');
-    const url = token ? `${API_URL}/${endpoint}?token=${token}` : `${API_URL}/${endpoint}`;
+    let targetUrl = `${BASE_URL}?url=api/${endpoint}`;
+    if (token) targetUrl += `&token=${token}`;
+    
+    const url = `${PROXY}${encodeURIComponent(targetUrl)}`;
     
     const headers = {};
     if (isPost) headers['Content-Type'] = 'text/plain';
@@ -360,27 +364,10 @@ async function checkoutCart() {
     console.log("currentUser:", currentUser);
 
     try {
-        const response = await fetch(`${API_URL}/biblioteca/checkout`, {
+        const data = await apiFetch('biblioteca/checkout', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
+            body: payload
         });
-
-        console.log("Checkout response status:", response.status);
-        const text = await response.text();
-        console.log("Checkout raw response:", text);
-
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error("Failed to parse response:", text);
-            toast("Erro no servidor: " + text.substring(0, 100), "error");
-            return false;
-        }
 
         if (data.sucesso) {
             cartClear();
