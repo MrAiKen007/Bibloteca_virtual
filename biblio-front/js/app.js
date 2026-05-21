@@ -2,14 +2,17 @@ const API_URL = "https://biblioipil.infinityfreeapp.com/index.php?url=api";
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
-    const defaultOptions = {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'text/plain'
-        }
+    const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
+    
+    const config = {
+        credentials: 'include'
     };
-
-    const config = { ...defaultOptions, ...options };
+    
+    if (isPost) {
+        config.headers = { 'Content-Type': 'text/plain' };
+    }
+    
+    if (options.method) config.method = options.method;
     if (options.body && typeof options.body === 'object') {
         config.body = JSON.stringify(options.body);
     }
