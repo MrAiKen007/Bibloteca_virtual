@@ -5,7 +5,7 @@ async function apiFetch(endpoint, options = {}) {
     const defaultOptions = {
         credentials: 'include',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'text/plain'
         }
     };
 
@@ -360,7 +360,7 @@ async function checkoutCart() {
             method: 'POST',
             credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain',
                 'Accept': 'application/json'
             },
             body: JSON.stringify(payload)
