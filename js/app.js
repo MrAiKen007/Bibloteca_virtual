@@ -4,9 +4,7 @@ const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://biblioipi
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
-    const config = {
-        credentials: 'include'
-    };
+    const config = {};
     
     if (isPost) {
         config.headers = { 'Content-Type': 'text/plain' };
@@ -361,7 +359,6 @@ async function checkoutCart() {
     try {
         const response = await fetch(`${API_URL}/biblioteca/checkout`, {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'text/plain',
                 'Accept': 'application/json'
