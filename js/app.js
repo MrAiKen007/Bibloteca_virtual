@@ -1,4 +1,4 @@
-const API_URL = "https://biblioipil.infinityfreeapp.com/index.php?url=api";
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://biblioipil.infinityfreeapp.com/index.php?url=api");
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
