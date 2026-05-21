@@ -120,4 +120,33 @@ class Utilizador
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function atualizar($id, $dados)
+    {
+        $fields = [];
+        $params = [':id' => $id];
+
+        $allowedFields = ['nome_completo', 'email', 'palavra_passe', 'papel', 'ativo', 'email_verificado'];
+        foreach ($allowedFields as $field) {
+            if (isset($dados[$field])) {
+                $fields[] = "$field = :$field";
+                $params[":$field"] = $dados[$field];
+            }
+        }
+
+        if (empty($fields)) {
+            return true;
+        }
+
+        $sql = "UPDATE utilizadores SET " . implode(', ', $fields) . " WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    public function eliminar($id)
+    {
+        $sql = "DELETE FROM utilizadores WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
 }

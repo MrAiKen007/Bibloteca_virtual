@@ -5,14 +5,15 @@ class BaseDados
     private static $instancia = null;
     private $conexao;
 
-    // CONFIGURAÇÃO - AJUSTA AQUI SE NECESSÁRIO
-    private $host = "127.0.0.1";
-    private $dbname = "biblioteca_virtual";
-    private $user = "root";
-    private $password = "Jorge2005@paim"; // Tentei vazio, pois é o padrão do XAMPP
+    // CONFIGURAÇÃO - Carregada do config/database.php (que lê o .env)
+    private $host;
+    private $dbname;
+    private $user;
+    private $password;
 
     private function __construct()
     {
+        // Carrega configurações do arquivo de configuração
         $configFile = __DIR__ . '/../../config/database.php';
         if (file_exists($configFile)) {
             $config = require $configFile;
@@ -20,11 +21,19 @@ class BaseDados
             $this->dbname = $config['dbname'] ?? 'biblioteca_virtual';
             $this->user = $config['user'] ?? 'root';
             $this->password = $config['password'] ?? '';
+            $port = $config['port'] ?? '3306';
+        } else {
+            // Fallback para configurações padrão
+            $this->host = '127.0.0.1';
+            $this->dbname = 'biblioteca_virtual';
+            $this->user = 'root';
+            $this->password = '';
+            $port = '3306';
         }
 
         try {
             $this->conexao = new PDO(
-                "mysql:host={$this->host};port=3306;dbname={$this->dbname};charset=utf8mb4",
+                "mysql:host={$this->host};port={$port};dbname={$this->dbname};charset=utf8mb4",
                 $this->user,
                 $this->password
             );

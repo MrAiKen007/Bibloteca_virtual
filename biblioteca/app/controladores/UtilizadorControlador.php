@@ -94,4 +94,145 @@ class UtilizadorControlador
             Resposta::erro("Erro ao criar utilizador: " . $e->getMessage());
         }
     }
+
+    public function editar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $_SESSION['erro'] = "ID não fornecido.";
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+
+        $utilizador = $this->utilizadorModel->buscarPorId($id);
+        if (!$utilizador) {
+            $_SESSION['erro'] = "Utilizador não encontrado.";
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+
+        require_once __DIR__ . '/../views/utilizadores/editar.php';
+    }
+
+    public function atualizar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            $_SESSION['erro'] = "ID não fornecido.";
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+
+        $utilizadorExistente = $this->utilizadorModel->buscarPorId($id);
+        if (!$utilizadorExistente) {
+            $_SESSION['erro'] = "Utilizador não encontrado.";
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+
+        $dados = [
+            'nome_completo' => $_POST['nome_completo'] ?? $utilizadorExistente['nome_completo'],
+            'email' => $_POST['email'] ?? $utilizadorExistente['email'],
+            'papel' => $_POST['papel'] ?? $utilizadorExistente['papel'],
+            'ativo' => isset($_POST['ativo']) ? (int)$_POST['ativo'] : $utilizadorExistente['ativo'],
+        ];
+
+        if (!empty($_POST['palavra_passe'])) {
+            $dados['palavra_passe'] = password_hash($_POST['palavra_passe'], PASSWORD_BCRYPT);
+        }
+
+        try {
+            $this->utilizadorModel->atualizar($id, $dados);
+            header("Location: index.php?url=utilizadores");
+            exit;
+        } catch (Exception $e) {
+            $_SESSION['erro'] = "Erro ao atualizar utilizador: " . $e->getMessage();
+            header("Location: index.php?url=utilizadores/editar&id=$id");
+            exit;
+        }
+    }
+
+    public function eliminar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            $_SESSION['erro'] = "ID não fornecido.";
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+
+        try {
+            $this->utilizadorModel->eliminar($id);
+            header("Location: index.php?url=utilizadores");
+            exit;
+        } catch (Exception $e) {
+            $_SESSION['erro'] = "Erro ao eliminar utilizador: " . $e->getMessage();
+            header("Location: index.php?url=utilizadores");
+            exit;
+        }
+    }
+
+    public function apiEditar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $id = $_GET['id'] ?? null;
+        if (!$id) Resposta::erro("ID não fornecido.");
+
+        $utilizador = $this->utilizadorModel->buscarPorId($id);
+        if (!$utilizador) Resposta::erro("Utilizador não encontrado.", 404);
+
+        Resposta::json($utilizador);
+    }
+
+    public function apiAtualizar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = $input['id'] ?? null;
+        if (!$id) Resposta::erro("ID não fornecido.");
+
+        $utilizadorExistente = $this->utilizadorModel->buscarPorId($id);
+        if (!$utilizadorExistente) Resposta::erro("Utilizador não encontrado.", 404);
+
+        $dados = [
+            'nome_completo' => $input['nome_completo'] ?? $utilizadorExistente['nome_completo'],
+            'email' => $input['email'] ?? $utilizadorExistente['email'],
+            'papel' => $input['papel'] ?? $utilizadorExistente['papel'],
+            'ativo' => isset($input['ativo']) ? (int)$input['ativo'] : $utilizadorExistente['ativo'],
+        ];
+
+        if (!empty($input['palavra_passe'])) {
+            $dados['palavra_passe'] = password_hash($input['palavra_passe'], PASSWORD_BCRYPT);
+        }
+
+        try {
+            $this->utilizadorModel->atualizar($id, $dados);
+            Resposta::json(['mensagem' => "Utilizador atualizado com sucesso!"]);
+        } catch (Exception $e) {
+            Resposta::erro("Erro ao atualizar utilizador: " . $e->getMessage());
+        }
+    }
+
+    public function apiEliminar()
+    {
+        Autorizacao::precisaPapel(['admin']);
+
+        $id = $_GET['id'] ?? null;
+        if (!$id) Resposta::erro("ID não fornecido.");
+
+        try {
+            $this->utilizadorModel->eliminar($id);
+            Resposta::json(['mensagem' => "Utilizador eliminado com sucesso!"]);
+        } catch (Exception $e) {
+            Resposta::erro("Erro ao eliminar utilizador: " . $e->getMessage());
+        }
+    }
 }

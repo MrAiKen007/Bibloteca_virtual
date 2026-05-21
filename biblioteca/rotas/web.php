@@ -102,6 +102,9 @@ $router->delete('api/editoras/eliminar', ['EditoraControlador', 'apiEliminar']);
 
 $router->get('api/utilizadores', ['UtilizadorControlador', 'apiListar']);
 $router->post('api/utilizadores/guardar', ['UtilizadorControlador', 'apiGuardar']);
+$router->get('api/utilizador', ['UtilizadorControlador', 'apiEditar']);
+$router->post('api/utilizadores/atualizar', ['UtilizadorControlador', 'apiAtualizar']);
+$router->delete('api/utilizadores/eliminar', ['UtilizadorControlador', 'apiEliminar']);
 $router->get('api/stats', ['DashboardControlador', 'apiStats']);
 
 $router->get('api/biblioteca', ['BibliotecaControlador', 'apiMinhaBiblioteca']);

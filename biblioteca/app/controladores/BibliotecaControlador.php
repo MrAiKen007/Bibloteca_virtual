@@ -167,6 +167,10 @@ class BibliotecaControlador
 
     private function getBaseUrl()
     {
+        $configuredUrl = $_ENV['APP_URL'] ?? null;
+        if ($configuredUrl) {
+            return rtrim($configuredUrl, '/') . '/';
+        }
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
         $scriptDir = dirname($_SERVER['SCRIPT_NAME']);

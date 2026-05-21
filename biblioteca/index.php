@@ -1,8 +1,19 @@
 <?php
-// Ativar reporte de erros para desenvolvimento
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+$envFile = __DIR__ . '/config/.env.app';
+$envLines = [];
+if (file_exists($envFile)) {
+    $envLines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($envLines as $line) {
+        if (strpos($line, '#') === 0 || strpos($line, '=') === false) continue;
+        list($key, $value) = explode('=', $line, 2);
+        $_ENV[trim($key)] = trim($value);
+    }
+}
+
+$isProduction = ($_ENV['APP_ENV'] ?? 'development') === 'production';
+ini_set('display_errors', $isProduction ? 0 : 1);
+ini_set('display_startup_errors', $isProduction ? 0 : 1);
+error_reporting($isProduction ? 0 : E_ALL);
 
 // Permitir que o frontend (Live Server ou outro) aceda à API
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
@@ -43,41 +54,41 @@ session_start();
 | CORE
 |--------------------------------------------------------------------------
 */
-require_once __DIR__ . "/../app/core/Router.php";
-require_once __DIR__ . "/../app/core/resposta.php";
-require_once __DIR__ . "/../app/core/BaseDados.php";
+require_once __DIR__ . "/app/core/Router.php";
+require_once __DIR__ . "/app/core/resposta.php";
+require_once __DIR__ . "/app/core/BaseDados.php";
 
 /*
 |--------------------------------------------------------------------------
 | MODELOS
 |--------------------------------------------------------------------------
 */
-require_once __DIR__ . "/../app/modelos/Utilizador.php";
-require_once __DIR__ . "/../app/modelos/Livro.php";
-require_once __DIR__ . "/../app/modelos/Autor.php";
-require_once __DIR__ . "/../app/modelos/Editora.php";
-require_once __DIR__ . "/../app/modelos/Pedido.php";
+require_once __DIR__ . "/app/modelos/Utilizador.php";
+require_once __DIR__ . "/app/modelos/Livro.php";
+require_once __DIR__ . "/app/modelos/Autor.php";
+require_once __DIR__ . "/app/modelos/Editora.php";
+require_once __DIR__ . "/app/modelos/Pedido.php";
 
 /*
 |--------------------------------------------------------------------------
 | CONTROLADORES
 |--------------------------------------------------------------------------
 */
-require_once __DIR__ . "/../app/controladores/AutenticacaoControlador.php";
-require_once __DIR__ . "/../app/controladores/UtilizadorControlador.php";
-require_once __DIR__ . "/../app/controladores/LivroControlador.php";
-require_once __DIR__ . "/../app/controladores/BibliotecaControlador.php";
-require_once __DIR__ . "/../app/controladores/AutorControlador.php";
-require_once __DIR__ . "/../app/controladores/EditoraControlador.php";
-require_once __DIR__ . "/../app/controladores/RegistoControlador.php";
-require_once __DIR__ . "/../app/controladores/AuditoriaControlador.php";
+require_once __DIR__ . "/app/controladores/AutenticacaoControlador.php";
+require_once __DIR__ . "/app/controladores/UtilizadorControlador.php";
+require_once __DIR__ . "/app/controladores/LivroControlador.php";
+require_once __DIR__ . "/app/controladores/BibliotecaControlador.php";
+require_once __DIR__ . "/app/controladores/AutorControlador.php";
+require_once __DIR__ . "/app/controladores/EditoraControlador.php";
+require_once __DIR__ . "/app/controladores/RegistoControlador.php";
+require_once __DIR__ . "/app/controladores/AuditoriaControlador.php";
 
 /*
 |--------------------------------------------------------------------------
 | MIDDLEWARES
 |--------------------------------------------------------------------------
 */
-require_once __DIR__ . "/../app/middlewares/Autorizacao.php";
+require_once __DIR__ . "/app/middlewares/Autorizacao.php";
 
 /*
 |--------------------------------------------------------------------------
@@ -91,7 +102,7 @@ $router = new Router();
 | ROTAS
 |--------------------------------------------------------------------------
 */
-require_once __DIR__ . "/../rotas/web.php";
+require_once __DIR__ . "/rotas/web.php";
 
 /*
 |--------------------------------------------------------------------------
@@ -107,7 +118,8 @@ $metodo = $_SERVER['REQUEST_METHOD'];
 |--------------------------------------------------------------------------
 */
 $rotasPublicas = [
-    'login'
+    'login',
+    'registo'
 ];
 
 /*

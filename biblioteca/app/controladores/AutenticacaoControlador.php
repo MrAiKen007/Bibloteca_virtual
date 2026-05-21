@@ -19,18 +19,34 @@ class AutenticacaoControlador
             exit;
         }
 
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateKey = 'login_attempts_' . $ip;
+        $attempts = $_SESSION[$rateKey] ?? ['count' => 0, 'time' => time()];
+
+        if (time() - $attempts['time'] > 300) {
+            $attempts = ['count' => 0, 'time' => time()];
+        }
+
+        if ($attempts['count'] >= 10) {
+            $_SESSION['erro'] = "Muitas tentativas. Aguarde 5 minutos.";
+            header("Location: index.php?url=login");
+            exit;
+        }
+
         $utilizadorModel = new Utilizador();
         $utilizador = $utilizadorModel->buscarPorEmail($email);
 
         if (!$utilizador) {
-
+            $attempts['count']++;
+            $_SESSION[$rateKey] = $attempts;
             $_SESSION['erro'] = "Utilizador não encontrado.";
             header("Location: index.php?url=login");
             exit;
         }
 
         if (!password_verify($senha, $utilizador['palavra_passe'])) {
-
+            $attempts['count']++;
+            $_SESSION[$rateKey] = $attempts;
             $_SESSION['erro'] = "Senha inválida.";
             header("Location: index.php?url=login");
             exit;
@@ -43,7 +59,10 @@ class AutenticacaoControlador
             exit;
         }
 
+        unset($_SESSION[$rateKey]);
+
         //  SESSÃO CORRETA
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $utilizador['id'];
         $_SESSION['user_nome'] = $utilizador['nome_completo'];
         $_SESSION['user_papel'] = $utilizador['papel'];
@@ -58,18 +77,20 @@ class AutenticacaoControlador
         ];
         $userDataEncoded = urlencode(json_encode($userData));
 
+        $frontendUrl = $_ENV['FRONTEND_URL'] ?? 'http://localhost:3000';
+
         switch ($utilizador['papel']) {
 
             case 'admin':
-                header("Location: ../../biblio-front/pages/admin/dashboard.html?user=" . $userDataEncoded);
+                header("Location: $frontendUrl/admin/dashboard?user=" . $userDataEncoded);
                 break;
 
             case 'backoffice':
-                header("Location: ../../biblio-front/pages/backoffice/dashboard.html?user=" . $userDataEncoded);
+                header("Location: $frontendUrl/backoffice/dashboard?user=" . $userDataEncoded);
                 break;
 
             default:
-                header("Location: ../../biblio-front/pages/catalogo.html?user=" . $userDataEncoded);
+                header("Location: $frontendUrl/catalogo?user=" . $userDataEncoded);
                 break;
         }
 
@@ -115,6 +136,7 @@ class AutenticacaoControlador
         $_SESSION['user_id'] = $utilizador['id'];
         $_SESSION['user_nome'] = $utilizador['nome_completo'];
         $_SESSION['user_papel'] = $utilizador['papel'];
+        session_regenerate_id(true);
 
         $db = BaseDados::getInstancia()->getConexao();
         $stmt = $db->prepare("INSERT INTO auditorias (utilizador_id, acao, tabela_afetada) VALUES (:user, 'login', 'utilizadores')");

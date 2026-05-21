@@ -1,12 +1,11 @@
-const API_URL = "http://127.0.0.1/dashboard/Bibloteca_virtual/biblioteca/public/api";
+const API_URL = "https://biblioipil.infinityfreeapp.com/index.php?url=api";
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
     const defaultOptions = {
-        credentials: 'include', // Essencial para manter a sessão PHP
+        credentials: 'include',
         headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            'Content-Type': 'application/json'
         }
     };
 
@@ -18,7 +17,6 @@ async function apiFetch(endpoint, options = {}) {
     try {
         const response = await fetch(`${API_URL}/${endpoint}`, config);
         
-        // Lidar com estados de erro HTTP
         if (response.status === 401) {
             console.warn("Sessão expirada ou não autenticado.");
             logout();

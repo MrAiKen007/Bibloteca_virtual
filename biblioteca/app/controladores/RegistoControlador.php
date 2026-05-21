@@ -20,7 +20,19 @@ class RegistoControlador
             exit;
         }
 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['erro'] = "E-mail inválido.";
+            header("Location: index.php?url=registo");
+            exit;
+        }
+
         $utilizadorModel = new Utilizador();
+
+        if ($utilizadorModel->buscarPorEmail($email)) {
+            $_SESSION['erro'] = "E-mail já está em uso.";
+            header("Location: index.php?url=registo");
+            exit;
+        }
 
         $dados = [
             'nome_completo' => $nome,

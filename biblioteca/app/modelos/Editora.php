@@ -69,4 +69,15 @@ class Editora
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
+
+    public function atualizar($id, $dados)
+    {
+        $sql = "UPDATE editoras SET nome = :nome, pais = :pais WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':id' => $id,
+            ':nome' => $dados['nome'],
+            ':pais' => $dados['pais']
+        ]);
+    }
 }
