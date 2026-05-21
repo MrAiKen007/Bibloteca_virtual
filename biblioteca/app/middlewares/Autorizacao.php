@@ -37,6 +37,9 @@ class Autorizacao
 
     private static function getToken()
     {
+        // Query param (primário para CORS proxy)
+        if (isset($_GET['token'])) return $_GET['token'];
+        
         // Header Authorization: Bearer <token>
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         if (preg_match('/Bearer\s+(.+)/i', $authHeader, $matches)) {
@@ -49,8 +52,7 @@ class Autorizacao
             return $input['token'];
         }
         
-        // Query param
-        return $_GET['token'] ?? null;
+        return null;
     }
 
     /*

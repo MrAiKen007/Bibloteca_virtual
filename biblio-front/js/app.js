@@ -5,9 +5,10 @@ async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
     const token = localStorage.getItem('biblio_token');
+    const url = token ? `${API_URL}/${endpoint}?token=${token}` : `${API_URL}/${endpoint}`;
+    
     const headers = {};
     if (isPost) headers['Content-Type'] = 'text/plain';
-    if (token) headers['Authorization'] = 'Bearer ' + token;
     
     const config = {};
     if (Object.keys(headers).length > 0) config.headers = headers;
@@ -18,7 +19,7 @@ async function apiFetch(endpoint, options = {}) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/${endpoint}`, config);
+        const response = await fetch(url, config);
         
         if (response.status === 401) {
             console.warn("Sessão expirada ou não autenticado.");
