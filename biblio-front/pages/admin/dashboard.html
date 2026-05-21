@@ -248,6 +248,7 @@ async function loadActivity(){
         };
 
         el.innerHTML = `
+            <div class="table-wrapper">
             <table class="activity-table">
                 <thead><tr><th>Utilizador</th><th>Ação</th><th>Tabela</th><th>Data</th></tr></thead>
                 <tbody>
@@ -264,6 +265,7 @@ async function loadActivity(){
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     } catch (err) {
         el.innerHTML = '<div class="p-12 text-center text-ds-text-muted">Erro ao carregar atividade.</div>';

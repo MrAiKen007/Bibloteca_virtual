@@ -31,15 +31,15 @@ function render(){
         return;
     }
     el.innerHTML = `
-    <div class="grid" style="gap:2rem;grid-template-columns:1fr 360px;">
-        <div>
+    <div class="cart-layout">
+        <div class="cart-items">
             <h1 class="mb-6 font-display text-3xl font-bold">Carrinho</h1>
             <div class="space-y-3">
                 ${cartItems.map(i => {
                     const b = getBook(i.bookId);
                     if (!b) return "";
                     return `<div class="card flex gap-4 p-3">
-                        <img src="${b.cover}" style="width:80px;height:112px;object-fit:cover;border-radius:var(--radius);" onerror="this.src='https://picsum.photos/seed/${b.id}/80/112'">
+                        <img src="${b.cover}" class="cart-item-img object-cover" style="border-radius:var(--radius);" onerror="this.src='https://picsum.photos/seed/${b.id}/80/112'">
                         <div style="flex:1;">
                             <a href="./livro.html?id=${b.id}" class="font-medium hover-text-primary">${b.title}</a>
                             <div class="text-xs text-muted">${b.author || getAuthor(b.authorId)?.name || ""}</div>
@@ -52,7 +52,7 @@ function render(){
                 }).join("")}
             </div>
         </div>
-        <div class="card h-fit card-p-5">
+        <div class="cart-summary card h-fit card-p-5">
             <h3 class="font-semibold">Resumo</h3>
             <div class="mt-4 space-y-2 text-sm">
                 <div class="flex justify-between"><span>Subtotal</span><span>${formatAOA(cartSubtotal())}</span></div>

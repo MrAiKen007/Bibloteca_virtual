@@ -46,7 +46,7 @@
         let html = '<div class="flex items-center gap-1" style="margin-top:0.5rem;">';
         for (let i = 1; i <= 5; i++) {
             const filled = i <= display;
-            html += `<span data-star="${i}" style="padding:2px;cursor:pointer;" onclick="submitRating(${i})" onmouseenter="hoverStar(${i})" onmouseleave="unhoverStar()">${starSVG(28, filled)}</span>`;
+            html += `<span class="star-rating-btn" data-star="${i}" onclick="submitRating(${i})" onmouseenter="hoverStar(${i})" onmouseleave="unhoverStar()">${starSVG(24, filled)}</span>`;
         }
         html += `<span id="rating-label" class="text-sm text-muted" style="margin-left:0.5rem;">${currentAvgRating > 0 ? currentAvgRating.toFixed(1) : 'Sem avaliação'} (${currentTotalRating} ${currentTotalRating === 1 ? 'avaliação' : 'avaliações'})</span>`;
         html += '</div>';
@@ -130,8 +130,8 @@
             const canBuy = book.compravel;
 
             document.getElementById("main").innerHTML = `
-              <div class="grid md-grid-cols-2" style="gap:2.5rem;">
-                <div><img src="${book.cover}" alt="${book.titulo}" style="width:100%;max-width:360px;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+              <div class="grid md-grid-cols-2 book-detail-grid" style="gap:2.5rem;">
+                <div><img src="${book.cover}" alt="${book.titulo}" class="book-cover" style="width:100%;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
                 <div>
                   <h1 class="font-display text-4xl font-bold">${book.titulo}</h1>
                   <div class="mt-2 text-muted">por <a href="./catalogo.html" class="text-primary" style="text-decoration:underline;">${authorName}</a> · ${publisherName}</div>
