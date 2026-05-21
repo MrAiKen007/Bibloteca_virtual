@@ -4,11 +4,13 @@ const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://biblioipi
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
-    const config = {};
+    const token = localStorage.getItem('biblio_token');
+    const headers = {};
+    if (isPost) headers['Content-Type'] = 'text/plain';
+    if (token) headers['Authorization'] = 'Bearer ' + token;
     
-    if (isPost) {
-        config.headers = { 'Content-Type': 'text/plain' };
-    }
+    const config = {};
+    if (Object.keys(headers).length > 0) config.headers = headers;
     
     if (options.method) config.method = options.method;
     if (options.body && typeof options.body === 'object') {
@@ -408,6 +410,10 @@ async function login(email, password) {
         user.role = user.papel;
         user.name = user.nome_completo;
         localStorage.setItem("biblio_user", JSON.stringify(user));
+        // Guardar token para auth sem cookies
+        if (user.token) {
+            localStorage.setItem("biblio_token", user.token);
+        }
         currentUser = user;
         return currentUser;
     } else {
@@ -429,6 +435,7 @@ async function register(nome, email, password) {
 
 function logout() {
     localStorage.removeItem("biblio_user");
+    localStorage.removeItem("biblio_token");
     const path = window.location.pathname;
     if (path.includes('/admin/') || path.includes('/backoffice/')) {
         location.href = "../login.html";
