@@ -466,39 +466,40 @@ footer { border-top: 1px solid var(--border); background: rgba(244,244,240,0.4);
    MOBILE RESPONSIVE OVERRIDES
    ============================================ */
 
-/* --- Touch Targets (min 44px) --- */
-.icon-btn {
-  min-width: 44px;
-  min-height: 44px;
-}
-.mobile-menu-btn {
-  min-width: 44px;
-  min-height: 44px;
-}
-.btn-sm {
-  min-height: 44px;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-}
-.badge {
-  min-height: 24px;
-  padding: 0.25rem 0.625rem;
-  font-size: 0.8125rem;
-}
+/* --- Touch Targets (min 44px) - Mobile only --- */
+@media (max-width: 767px) {
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .mobile-menu-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .btn-sm {
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+  .badge {
+    min-height: 24px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+  }
 
-/* --- Text Sizes (min 14px on mobile) --- */
-.text-xs { font-size: 0.8125rem; }
-.table th { font-size: 0.8125rem; }
-.table td { font-size: 0.875rem; }
+  /* --- Text Sizes (min 14px on mobile) --- */
+  .text-xs { font-size: 0.8125rem; }
+  .table th { font-size: 0.8125rem; }
+  .table td { font-size: 0.875rem; }
 
-/* --- Form Inputs (16px to prevent iOS zoom) --- */
-.input, input[type="text"], input[type="email"], input[type="password"],
-input[type="number"], input[type="tel"], input[type="search"],
-input[type="url"], select, textarea {
-  font-size: 16px;
-  min-height: 44px;
+  /* --- Form Inputs (16px to prevent iOS zoom) --- */
+  .input, input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], input[type="tel"], input[type="search"],
+  input[type="url"], select, textarea {
+    font-size: 16px;
+    min-height: 44px;
+  }
 }
-select { padding-right: 2rem; }
 
 /* --- Table Horizontal Scroll --- */
 .table-wrapper {
@@ -527,74 +528,76 @@ select { padding-right: 2rem; }
 .cart-layout,
 .checkout-layout {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+  gap: 2rem;
 }
+.cart-items,
+.checkout-items { flex: 1; }
 .cart-summary,
-.checkout-summary {
-  width: 100%;
-}
-@media (min-width: 768px) {
+.checkout-summary { width: 360px; flex-shrink: 0; }
+@media (max-width: 767px) {
   .cart-layout,
   .checkout-layout {
-    flex-direction: row;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
   }
-  .cart-items,
-  .checkout-items { flex: 1; }
   .cart-summary,
-  .checkout-summary { width: 360px; flex-shrink: 0; }
+  .checkout-summary {
+    width: 100%;
+  }
 }
 
 /* --- Admin/Backoffice Main Content --- */
 .main-content {
-  padding: 1.25rem;
+  padding: 2.5rem 3rem;
 }
-@media (min-width: 640px) {
-  .main-content { padding: 1.5rem 2rem; }
-}
-@media (min-width: 768px) {
+@media (max-width: 1023px) {
   .main-content { padding: 2rem 2.5rem; }
 }
-@media (min-width: 1024px) {
-  .main-content { padding: 2.5rem 3rem; }
+@media (max-width: 767px) {
+  .main-content { padding: 1.5rem 2rem; }
+}
+@media (max-width: 639px) {
+  .main-content { padding: 1.25rem; }
 }
 
 /* --- Admin Metrics Grid --- */
 .metrics-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
 }
-@media (min-width: 768px) {
-  .metrics-row { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+@media (max-width: 767px) {
+  .metrics-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
 }
 
 /* --- Admin Form Cards --- */
 .form-card {
-  padding: 1.25rem;
-  max-width: 100%;
+  padding: 2rem;
+  max-width: 600px;
 }
-@media (min-width: 640px) {
-  .form-card { padding: 2rem; max-width: 600px; }
+@media (max-width: 639px) {
+  .form-card { padding: 1.25rem; max-width: 100%; }
 }
 
 /* --- Chart Containers --- */
 .chart-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
-@media (min-width: 768px) {
-  .chart-row { grid-template-columns: 1fr 1fr; }
+@media (max-width: 767px) {
+  .chart-row { grid-template-columns: 1fr; }
 }
 
 /* --- Author/Profile Headers --- */
-.author-header,
-.profile-header {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
+@media (max-width: 639px) {
+  .author-header,
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
 @media (min-width: 640px) {
   .author-header,
@@ -607,16 +610,18 @@ select { padding-right: 2rem; }
 
 /* --- Book Detail Grid --- */
 .book-detail-grid {
-  gap: 1.5rem;
+  gap: 2.5rem;
 }
-@media (min-width: 768px) {
-  .book-detail-grid { gap: 2.5rem; }
+@media (max-width: 767px) {
+  .book-detail-grid { gap: 1.5rem; }
 }
 
 /* --- Library Search --- */
-.library-search {
-  width: 100%;
-  margin-top: 0.75rem;
+@media (max-width: 639px) {
+  .library-search {
+    width: 100%;
+    margin-top: 0.75rem;
+  }
 }
 @media (min-width: 640px) {
   .library-search { width: 18rem; margin-top: 0; }
@@ -627,10 +632,12 @@ select { padding-right: 2rem; }
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.catalog-controls select {
-  width: 100%;
-  max-width: 100%;
-  height: 44px;
+@media (max-width: 639px) {
+  .catalog-controls select {
+    width: 100%;
+    max-width: 100%;
+    height: 44px;
+  }
 }
 @media (min-width: 640px) {
   .catalog-controls select { width: 176px; }
@@ -639,64 +646,74 @@ select { padding-right: 2rem; }
 /* --- Filter Bar (Backoffice Livros) --- */
 .filter-bar {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 180px 180px;
   gap: 0.75rem;
 }
-@media (min-width: 640px) {
-  .filter-bar { grid-template-columns: 1fr 180px 180px; }
+@media (max-width: 639px) {
+  .filter-bar { grid-template-columns: 1fr; }
 }
 
 /* --- Taxonomy Grid --- */
 .taxo-grid {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
 }
-@media (min-width: 640px) {
-  .taxo-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* --- Tag Remove Button --- */
-.tag-remove {
-  min-width: 32px;
-  min-height: 32px;
-  width: 32px;
-  height: 32px;
-}
-
-/* --- Mobile Toggle (Admin) --- */
-.mobile-toggle {
-  min-width: 44px;
-  min-height: 44px;
-  width: 44px;
-  height: 44px;
+@media (max-width: 639px) {
+  .taxo-grid { grid-template-columns: 1fr; }
 }
 
 /* --- Star Rating Touch Targets --- */
-.star-rating-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 4px;
-  cursor: pointer;
+@media (max-width: 767px) {
+  .star-rating-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+    cursor: pointer;
+  }
 }
 
 /* --- Password Toggle --- */
-.password-toggle {
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+@media (max-width: 767px) {
+  .password-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* --- Mobile Toggle (Admin) --- */
+@media (max-width: 767px) {
+  .mobile-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* --- Tag Remove Button --- */
+@media (max-width: 767px) {
+  .tag-remove {
+    min-width: 32px;
+    min-height: 32px;
+    width: 32px;
+    height: 32px;
+  }
 }
 
 /* --- Large Headings --- */
 h1.text-6xl {
-  font-size: 2.5rem;
+  font-size: 3.75rem;
   line-height: 1.1;
 }
-@media (min-width: 640px) {
-  h1.text-6xl { font-size: 3.75rem; }
+@media (max-width: 639px) {
+  h1.text-6xl {
+    font-size: 2.5rem;
+  }
 }
 
 /* --- Sidebar Footer (JS-generated) --- */
@@ -706,36 +723,42 @@ h1.text-6xl {
 }
 
 /* --- Reader Header --- */
-.reader-header {
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
+@media (max-width: 639px) {
+  .reader-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+  .reader-spacer { display: none; }
 }
-.reader-spacer { display: none; }
 @media (min-width: 640px) {
   .reader-spacer { display: block; width: 100px; }
   .reader-header { padding: 0.75rem 1.5rem; }
 }
 
 /* --- Cart Item Image --- */
-.cart-item-img {
-  width: 64px;
-  height: 90px;
+@media (max-width: 639px) {
+  .cart-item-img {
+    width: 64px;
+    height: 90px;
+  }
 }
 @media (min-width: 640px) {
   .cart-item-img { width: 80px; height: 112px; }
 }
 
 /* --- List View Item --- */
-.list-item {
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.list-item-img {
-  width: 100%;
-  max-width: 200px;
-  height: auto;
-  aspect-ratio: 3/4;
+@media (max-width: 639px) {
+  .list-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .list-item-img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    aspect-ratio: 3/4;
+  }
 }
 @media (min-width: 640px) {
   .list-item { flex-direction: row; gap: 1rem; }
@@ -744,15 +767,17 @@ h1.text-6xl {
 
 /* --- Profile Grid --- */
 .profile-grid {
-  gap: 1.25rem;
+  gap: 2rem;
 }
-@media (min-width: 1024px) {
-  .profile-grid { gap: 2rem; }
+@media (max-width: 1023px) {
+  .profile-grid { gap: 1.25rem; }
 }
 
 /* --- Book Cover Max Width --- */
-.book-cover {
-  max-width: 280px;
+@media (max-width: 639px) {
+  .book-cover {
+    max-width: 280px;
+  }
 }
 @media (min-width: 640px) {
   .book-cover { max-width: 360px; }
