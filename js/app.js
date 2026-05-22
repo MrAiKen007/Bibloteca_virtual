@@ -437,22 +437,79 @@ function logout() {
 // --- UI HELPERS ---
 
 function toast(msg, type = "success") {
-    const existing = document.querySelector('.toast-notification');
-    if (existing) existing.remove();
+    const container = document.getElementById('toast-container') || (() => {
+        const c = document.createElement('div');
+        c.id = 'toast-container';
+        c.style.cssText = 'position:fixed;top:1rem;right:1rem;z-index:10000;display:flex;flex-direction:column;gap:0.5rem;max-width:380px;width:calc(100% - 2rem);pointer-events:none;';
+        document.body.appendChild(c);
+        return c;
+    })();
 
-    const el = document.createElement("div");
-    el.className = `toast-notification fixed bottom-4 right-4 p-4 rounded-xl shadow-2xl z-[9999] transition-all transform translate-y-10 opacity-0 font-bold ${
-        type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-    }`;
-    el.textContent = msg;
-    document.body.appendChild(el);
-    requestAnimationFrame(() => {
-        el.classList.remove("translate-y-10", "opacity-0");
+    const icons = {
+        success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        warning: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+
+    const colors = {
+        success: { bg: '#f0fdf4', border: '#22c55e', icon: '#16a34a', text: '#166534' },
+        error: { bg: '#fef2f2', border: '#ef4444', icon: '#dc2626', text: '#991b1b' },
+        warning: { bg: '#fffbeb', border: '#f59e0b', icon: '#d97706', text: '#92400e' },
+        info: { bg: '#eff6ff', border: '#3b82f6', icon: '#2563eb', text: '#1e40af' }
+    };
+
+    const c = colors[type] || colors.info;
+    const icon = icons[type] || icons.info;
+    const duration = type === 'error' ? 5000 : 4000;
+
+    const el = document.createElement('div');
+    el.style.cssText = `pointer-events:auto;display:flex;align-items:flex-start;gap:0.75rem;padding:0.875rem 1rem;border-radius:12px;background:${c.bg};border:1px solid ${c.border};border-left:4px solid ${c.border};box-shadow:0 4px 16px rgba(0,0,0,0.08),0 1px 3px rgba(0,0,0,0.04);animation:toastSlideIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards;cursor:pointer;position:relative;overflow:hidden;`;
+    el.innerHTML = `
+        <div style="flex-shrink:0;color:${c.icon};margin-top:1px;">${icon}</div>
+        <div style="flex:1;font-size:0.875rem;line-height:1.5;color:${c.text};font-weight:500;">${msg}</div>
+        <button onclick="this.parentElement.style.animation='toastSlideOut 0.25s ease forwards';setTimeout(()=>this.parentElement.remove(),250)" style="flex-shrink:0;background:none;border:none;color:${c.icon};cursor:pointer;padding:2px;opacity:0.6;transition:opacity 0.15s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div style="position:absolute;bottom:0;left:0;height:3px;background:${c.border};border-radius:0 0 0 12px;animation:toastProgress ${duration}ms linear forwards;"></div>
+    `;
+
+    el.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        el.style.animation = 'toastSlideOut 0.25s ease forwards';
+        setTimeout(() => el.remove(), 250);
     });
+
+    container.appendChild(el);
     setTimeout(() => {
-        el.classList.add("translate-y-10", "opacity-0");
-        setTimeout(() => el.remove(), 500);
-    }, 3000);
+        if (el.parentElement) {
+            el.style.animation = 'toastSlideOut 0.25s ease forwards';
+            setTimeout(() => el.remove(), 250);
+        }
+    }, duration);
+}
+
+if (!document.getElementById('toast-animations')) {
+    const style = document.createElement('style');
+    style.id = 'toast-animations';
+    style.textContent = `
+        @keyframes toastSlideIn {
+            from { opacity:0; transform:translateX(100%) scale(0.95); }
+            to { opacity:1; transform:translateX(0) scale(1); }
+        }
+        @keyframes toastSlideOut {
+            from { opacity:1; transform:translateX(0) scale(1); }
+            to { opacity:0; transform:translateX(100%) scale(0.95); }
+        }
+        @keyframes toastProgress {
+            from { width:100%; }
+            to { width:0%; }
+        }
+        @media (max-width: 640px) {
+            #toast-container { top:auto; bottom:1rem; right:0.5rem; left:0.5rem; max-width:none; width:calc(100% - 1rem); }
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // --- UI RENDERING ---
