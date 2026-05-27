@@ -1,6 +1,7 @@
 const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
 const PROXIES = [
     "https://corsproxy.io/?url=",
+    "https://api.cors.lol/?url=",
 ];
 
 function apiUrl(endpoint) {
