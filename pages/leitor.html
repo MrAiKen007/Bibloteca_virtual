@@ -47,9 +47,8 @@ async function loadReader(){
     if (!id) { showError("Livro não especificado"); return; }
 
     try {
-        const res = await fetch(apiUrl(`livro?id=${id}`));
-        if (!res.ok) { showError("Livro não encontrado"); return; }
-        const data = await res.json();
+        const data = await apiFetch(`livro?id=${id}`);
+        if (!data.sucesso || !data.dados) { showError("Livro não encontrado"); return; }
         const book = data.dados;
 
         document.getElementById("book-title").textContent = book.titulo || "Sem título";

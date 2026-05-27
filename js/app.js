@@ -1,50 +1,59 @@
 const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
-const PROXY = "https://corsproxy.io/?url=";
+const PROXIES = [
+    "https://corsproxy.io/?url=",
+];
 
-// --- HELPERS DE URL DA API ---
 function apiUrl(endpoint) {
     const token = localStorage.getItem('biblio_token');
     let url = `${BASE_URL}?url=api/${endpoint.replace(/^\//, '')}`;
     if (token) url += `&token=${token}`;
-    return `${PROXY}${encodeURIComponent(url)}`;
+    return `${PROXIES[0]}${encodeURIComponent(url)}`;
 }
 
-// --- WRAPPER GLOBAL DE API ---
+let _lastProxyIndex = 0;
+
 async function apiFetch(endpoint, options = {}) {
-    const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
-    
     const token = localStorage.getItem('biblio_token');
-    let targetUrl = `${BASE_URL}?url=api/${endpoint}`;
-    if (token) targetUrl += `&token=${token}`;
-    
-    const url = `${PROXY}${encodeURIComponent(targetUrl)}`;
-    
-    const headers = {};
-    if (isPost) headers['Content-Type'] = 'text/plain';
-    
-    const config = {};
-    if (Object.keys(headers).length > 0) config.headers = headers;
-    
-    if (options.method) config.method = options.method;
-    if (options.body && typeof options.body === 'object') {
-        config.body = JSON.stringify(options.body);
-    }
+    const maxRetries = PROXIES.length * 2;
 
-    try {
-        const response = await fetch(url, config);
-        
-        if (response.status === 401) {
-            console.warn("Sessão expirada ou não autenticado.");
-            logout();
-            return { sucesso: false, mensagem: "Sessão expirada." };
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        const proxyIdx = _lastProxyIndex % PROXIES.length;
+        _lastProxyIndex++;
+        const proxy = PROXIES[proxyIdx];
+
+        try {
+            let targetUrl = `${BASE_URL}?url=api/${endpoint}`;
+            if (token) targetUrl += `&token=${token}`;
+            const url = `${proxy}${encodeURIComponent(targetUrl)}`;
+
+            const headers = {};
+            if (options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase())) {
+                headers['Content-Type'] = 'text/plain';
+            }
+            const config = {};
+            if (Object.keys(headers).length > 0) config.headers = headers;
+            if (options.method) config.method = options.method;
+            if (options.body && typeof options.body === 'object') {
+                config.body = JSON.stringify(options.body);
+            }
+
+            const response = await fetch(url, config);
+            if (response.status === 401) {
+                logout();
+                return { sucesso: false, mensagem: "Sessão expirada." };
+            }
+            const data = await response.json();
+            if (data && data.sucesso !== undefined) return data;
+            return data;
+        } catch (err) {
+            if (attempt === maxRetries - 1) {
+                console.error(`Erro na chamada API (${endpoint}):`, err);
+                return { sucesso: false, mensagem: "Erro de ligação ao servidor." };
+            }
+            await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
         }
-
-        const data = await response.json();
-        return data;
-    } catch (err) {
-        console.error(`Erro na chamada API (${endpoint}):`, err);
-        return { sucesso: false, mensagem: "Erro de ligação ao servidor." };
     }
+    return { sucesso: false, mensagem: "Erro de ligação ao servidor." };
 }
 
 // --- VERIFICAR USUÁRIO NA URL (REDIRECIONAMENTO DO BACKEND) ---

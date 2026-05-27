@@ -82,12 +82,10 @@
         const userId = currentUser.id || currentUser.user_id;
         if (!userId) { toast('Erro: ID do utilizador não encontrado. Faça login novamente.', 'error'); isSubmitting = false; return; }
         try {
-            const res = await fetch(apiUrl('livro/avaliar'), {
+            const data = await apiFetch('livro/avaliar', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify({ livro_id: currentBookId, nota, user_id: userId })
+                body: { livro_id: currentBookId, nota, user_id: userId }
             });
-            const data = await res.json();
             if (data.sucesso) {
                 currentUserRating = data.user_nota;
                 currentAvgRating = data.media;
@@ -111,10 +109,8 @@
 
         try {
             const userId = currentUser ? (currentUser.id || currentUser.user_id) : '';
-            const url = apiUrl(`livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`);
-            const res = await fetch(url);
-            if (!res.ok) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
-            const data = await res.json();
+            const data = await apiFetch(`livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`);
+            if (!data.sucesso || !data.dados) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
             const book = data.dados;
             currentBookId = book.id;
             currentUserRating = book.user_rating || 0;
