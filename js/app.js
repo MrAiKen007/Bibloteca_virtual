@@ -1,6 +1,14 @@
 const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
 const PROXY = "https://corsproxy.io/?";
 
+// --- HELPERS DE URL DA API ---
+function apiUrl(endpoint) {
+    const token = localStorage.getItem('biblio_token');
+    let url = `${BASE_URL}?url=api/${endpoint.replace(/^\//, '')}`;
+    if (token) url += `&token=${token}`;
+    return `${PROXY}${encodeURIComponent(url)}`;
+}
+
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
