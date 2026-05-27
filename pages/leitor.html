@@ -6,16 +6,10 @@
 <link rel="stylesheet" href="../css/styles.css">
 <style>
   .reader-layout { display: flex; flex-direction: column; height: 100vh; background: #1a1a1a; }
-  .reader-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #111; border-bottom: 1px solid #333; color: #f2f2f2; flex-shrink: 0; flex-wrap: wrap; gap: 0.5rem; }
-  .reader-header .book-title { font-family: var(--ds-font-serif); font-size: 0.875rem; font-weight: 700; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .reader-header .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; min-height: 44px; border-radius: 6px; border: 1px solid #444; background: transparent; color: #f2f2f2; cursor: pointer; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+  .reader-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.5rem; background: #111; border-bottom: 1px solid #333; color: #f2f2f2; flex-shrink: 0; }
+  .reader-header .book-title { font-family: var(--ds-font-serif); font-size: 1rem; font-weight: 700; }
+  .reader-header .back-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #444; background: transparent; color: #f2f2f2; cursor: pointer; font-size: 0.8125rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
   .reader-header .back-btn:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
-  .reader-spacer { width: 100px; }
-  @media (min-width: 640px) {
-    .reader-header { padding: 0.75rem 1.5rem; }
-    .reader-header .book-title { font-size: 1rem; max-width: none; }
-    .reader-spacer { display: block; }
-  }
   .reader-body { flex: 1; overflow: hidden; }
   .reader-body iframe { width: 100%; height: 100%; border: none; }
   .reader-error { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #f2f2f2; text-align: center; padding: 2rem; }
@@ -33,13 +27,13 @@
       Voltar
     </a>
     <span class="book-title" id="book-title">A carregar...</span>
-    <div class="reader-spacer"></div>
+    <div style="width:100px"></div>
   </div>
   <div class="reader-body" id="reader-body"></div>
 </div>
 
 <script src="../js/data.js"></script>
-<script src="../js/app.js?v=202605272031"></script>
+<script src="../js/app.js"></script>
 <script>
 async function loadReader(){
     const params = new URLSearchParams(location.search);
@@ -47,8 +41,9 @@ async function loadReader(){
     if (!id) { showError("Livro não especificado"); return; }
 
     try {
-        const data = await apiFetch(`livro?id=${id}`);
-        if (!data.sucesso || !data.dados) { showError("Livro não encontrado"); return; }
+        const res = await fetch(`${API_URL}/livro?id=${id}`, { credentials: 'include' });
+        if (!res.ok) { showError("Livro não encontrado"); return; }
+        const data = await res.json();
         const book = data.dados;
 
         document.getElementById("book-title").textContent = book.titulo || "Sem título";
@@ -58,7 +53,7 @@ async function loadReader(){
             return;
         }
 
-        const pdfUrl = apiUrl(`livro/pdf?id=${id}`);
+        const pdfUrl = `${API_URL}/livro/pdf?id=${id}`;
         document.getElementById("reader-body").innerHTML = `<iframe src="${pdfUrl}" title="${book.titulo}" allowfullscreen></iframe>`;
     } catch (err) {
         showError("Erro ao carregar o livro. Verifique a sua ligação.");

@@ -310,7 +310,7 @@
 </div>
 
 <script src="../../js/data.js"></script>
-<script src="../../js/app.js?v=202605272031"></script>
+<script src="../../js/app.js"></script>
 <script>
 function toggleMobileSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('mobile-overlay').classList.toggle('open'); }
 function renderSidebar(){
@@ -378,25 +378,16 @@ async function handleBookSubmit(e){
     e.preventDefault();
     const btn = document.getElementById('book-submit-btn');
     btn.disabled = true; btn.textContent = 'A guardar...';
-    const form = e.target;
-    const data = {
-        titulo: form.titulo.value,
-        autor_id: form.autor_id.value,
-        editora_id: form.editora_id.value,
-        sinopse: form.sinopse.value,
-        isbn: form.isbn.value,
-        idioma: form.idioma.value,
-        ano_publicacao: form.ano_publicacao.value,
-        numero_paginas: form.numero_paginas.value,
-        preco: form.preco.value,
-        estado: form.estado.value,
-        compravel: form.compravel.value,
-        legivel_no_site: form.legivel_no_site.value,
-        tags: JSON.stringify(selectedTags),
-        generos: JSON.stringify(selectedGenres)
-    };
+    const formData = new FormData(e.target);
+    const coverInput = document.getElementById('cover-input');
+    if (coverInput.files && coverInput.files[0]) formData.append('capa', coverInput.files[0]);
+    const pdfInput = document.getElementById('pdf-input');
+    if (pdfInput.files && pdfInput.files[0]) formData.append('pdf', pdfInput.files[0]);
+    formData.append('tags', JSON.stringify(selectedTags));
+    formData.append('generos', JSON.stringify(selectedGenres));
     try {
-        const result = await apiFetch('livros/guardar', { method: 'POST', body: data });
+        const response = await fetch(`${API_URL}/livros/guardar`, { method: 'POST', body: formData, credentials: 'include' });
+        const result = await response.json();
         if (result.sucesso) { toast('Livro adicionado com sucesso!'); closeBookModal(); await fetchBooks(); render(); }
         else toast(result.mensagem || result.erro || 'Erro ao adicionar livro', 'error');
     } catch (err) { toast('Erro de ligação ao servidor', 'error'); }

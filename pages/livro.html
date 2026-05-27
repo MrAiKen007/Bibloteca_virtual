@@ -25,7 +25,7 @@
   <footer id="footer"></footer>
 
   <script src="../js/data.js"></script>
-  <script src="../js/app.js?v=202605272031"></script>
+  <script src="../js/app.js"></script>
   <script>
     let currentBookId = null;
     let currentAvgRating = 0;
@@ -46,7 +46,7 @@
         let html = '<div class="flex items-center gap-1" style="margin-top:0.5rem;">';
         for (let i = 1; i <= 5; i++) {
             const filled = i <= display;
-            html += `<span class="star-rating-btn" data-star="${i}" onclick="submitRating(${i})" onmouseenter="hoverStar(${i})" onmouseleave="unhoverStar()">${starSVG(24, filled)}</span>`;
+            html += `<span data-star="${i}" style="padding:2px;cursor:pointer;" onclick="submitRating(${i})" onmouseenter="hoverStar(${i})" onmouseleave="unhoverStar()">${starSVG(28, filled)}</span>`;
         }
         html += `<span id="rating-label" class="text-sm text-muted" style="margin-left:0.5rem;">${currentAvgRating > 0 ? currentAvgRating.toFixed(1) : 'Sem avaliação'} (${currentTotalRating} ${currentTotalRating === 1 ? 'avaliação' : 'avaliações'})</span>`;
         html += '</div>';
@@ -82,10 +82,13 @@
         const userId = currentUser.id || currentUser.user_id;
         if (!userId) { toast('Erro: ID do utilizador não encontrado. Faça login novamente.', 'error'); isSubmitting = false; return; }
         try {
-            const data = await apiFetch('livro/avaliar', {
+            const res = await fetch(`${API_URL}/livro/avaliar`, {
                 method: 'POST',
-                body: { livro_id: currentBookId, nota, user_id: userId }
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'include',
+                body: JSON.stringify({ livro_id: currentBookId, nota, user_id: userId })
             });
+            const data = await res.json();
             if (data.sucesso) {
                 currentUserRating = data.user_nota;
                 currentAvgRating = data.media;
@@ -109,8 +112,10 @@
 
         try {
             const userId = currentUser ? (currentUser.id || currentUser.user_id) : '';
-            const data = await apiFetch(`livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`);
-            if (!data.sucesso || !data.dados) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
+            const url = `${API_URL}/livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`;
+            const res = await fetch(url, { credentials: 'include' });
+            if (!res.ok) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
+            const data = await res.json();
             const book = data.dados;
             currentBookId = book.id;
             currentUserRating = book.user_rating || 0;
@@ -125,8 +130,8 @@
             const canBuy = book.compravel;
 
             document.getElementById("main").innerHTML = `
-              <div class="grid md-grid-cols-2 book-detail-grid" style="gap:2.5rem;">
-                <div><img src="${book.cover}" alt="${book.titulo}" class="book-cover" style="width:100%;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+              <div class="grid md-grid-cols-2" style="gap:2.5rem;">
+                <div><img src="${book.cover}" alt="${book.titulo}" style="width:100%;max-width:360px;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
                 <div>
                   <h1 class="font-display text-4xl font-bold">${book.titulo}</h1>
                   <div class="mt-2 text-muted">por <a href="./catalogo.html" class="text-primary" style="text-decoration:underline;">${authorName}</a> · ${publisherName}</div>
