@@ -1,5 +1,5 @@
 const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
-const PROXY = "https://corsproxy.io/?";
+const PROXY = "https://corsproxy.io/?url=";
 
 // --- HELPERS DE URL DA API ---
 function apiUrl(endpoint) {
