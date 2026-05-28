@@ -2,6 +2,9 @@
 # BIBLIO - Biblioteca Virtual .htaccess
 # ============================================
 
+# Servir index.html (frontend) por defeito em vez de index.php
+DirectoryIndex index.html index.php
+
 # Proteger arquivo .env
 <Files .env>
     <IfModule mod_authz_core.c>

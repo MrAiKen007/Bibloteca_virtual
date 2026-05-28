@@ -1,21 +1,19 @@
 const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
 const API_URL = isLocal
     ? "http://127.0.0.1/dashboard/Bibloteca_virtual-1/biblioteca/index.php"
-    : "https://biblioipil.infinityfreeapp.com/index.php";
+    : "/index.php";
 const BASE_URL = API_URL;
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
-    const token = localStorage.getItem('biblio_token');
     let url = `${BASE_URL}?url=api/${endpoint}`;
     
     const headers = {};
-    if (token && !isLocal) headers['Authorization'] = `Bearer ${token}`;
     if (isPost) headers['Content-Type'] = 'application/json';
     
-    const config = { credentials: 'include' };
+    const config = {};
     if (Object.keys(headers).length > 0) config.headers = headers;
     
     if (options.method) config.method = options.method;
