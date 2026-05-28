@@ -13,7 +13,7 @@ async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     if (isPost) headers['Content-Type'] = 'application/json';
     
-    const config = { credentials: isLocal ? 'include' : 'omit' };
+    const config = { credentials: 'include' };
     if (Object.keys(headers).length > 0) config.headers = headers;
     if (options.method) config.method = options.method;
     if (options.body && typeof options.body === 'object') {

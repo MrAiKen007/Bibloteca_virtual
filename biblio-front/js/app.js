@@ -15,7 +15,7 @@ async function apiFetch(endpoint, options = {}) {
     const headers = {};
     if (isPost) headers['Content-Type'] = 'application/json';
     
-    const config = { credentials: isLocal ? 'include' : 'omit' };
+    const config = { credentials: 'include' };
     if (Object.keys(headers).length > 0) config.headers = headers;
     
     if (options.method) config.method = options.method;
