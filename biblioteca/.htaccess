@@ -13,14 +13,21 @@
     </IfModule>
 </Files>
 
-# CORS Headers - geridos pelo PHP dinamicamente
+# CORS Headers (nível Apache - sempre enviados, mesmo para OPTIONS preflight)
 <IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-XSS-Protection "1; mode=block"
+    Header always setifempty Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
 </IfModule>
 
 # Ativar rewrite URL
 RewriteEngine On
+
+# Responder a OPTIONS preflight sem passar ao PHP
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule .* - [R=204,L]
 
 # Redirecionar todas as requisições para index.php
 RewriteCond %{REQUEST_FILENAME} !-f
