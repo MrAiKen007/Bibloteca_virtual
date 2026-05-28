@@ -1,21 +1,27 @@
-const API_URL = "https://biblioipil.infinityfreeapp.com/index.php?url=api";
+const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+const API_URL = isLocal
+    ? "http://127.0.0.1/dashboard/Bibloteca_virtual-1/biblioteca/index.php?url=api"
+    : "https://biblioipil.infinityfreeapp.com/index.php?url=api";
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
-    const defaultOptions = {
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
-
-    const config = { ...defaultOptions, ...options };
+    const token = localStorage.getItem('biblio_token');
+    let url = `${API_URL}/${endpoint}`;
+    if (token && !isLocal) url += `&token=${token}`;
+    
+    const headers = {};
+    const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
+    if (isPost) headers['Content-Type'] = 'application/json';
+    
+    const config = { credentials: isLocal ? 'include' : 'omit' };
+    if (Object.keys(headers).length > 0) config.headers = headers;
+    if (options.method) config.method = options.method;
     if (options.body && typeof options.body === 'object') {
         config.body = JSON.stringify(options.body);
     }
 
     try {
-        const response = await fetch(`${API_URL}/${endpoint}`, config);
+        const response = await fetch(url, config);
         
         if (response.status === 401) {
             console.warn("Sessão expirada ou não autenticado.");
@@ -75,6 +81,16 @@ function enforceRoleAccess() {
         return;
     }
 
+    // Se já estiver logado, redirecionar para fora das páginas de auth
+    if (isLoginPage) {
+        const role = (currentUser.role || currentUser.papel || "").toLowerCase();
+        const base = isInPages ? "./" : "./pages/";
+        if (role === 'admin') window.location.href = base + "admin/dashboard.html";
+        else if (role === 'backoffice') window.location.href = base + "backoffice/dashboard.html";
+        else window.location.href = base + "biblioteca.html";
+        return;
+    }
+
     // Normalização rigorosa
     const role = (currentUser.role || currentUser.papel || "").toLowerCase();
     console.log("Verificando acesso para role:", role, "em:", path);
@@ -82,12 +98,12 @@ function enforceRoleAccess() {
     const base = isInPages ? "./" : "./pages/";
 
     if (role === 'admin') {
-        if (!isAdminPath && !isLoginPage && !path.includes('dashboard.html')) {
+        if (!isAdminPath && !path.includes('dashboard.html')) {
             console.log("Admin detectado em área pública. Redirecionando...");
             window.location.href = base + "admin/dashboard.html";
         }
     } else if (role === 'backoffice') {
-        if (!isBackofficePath && !isLoginPage && !path.includes('dashboard.html')) {
+        if (!isBackofficePath && !path.includes('dashboard.html')) {
             console.log("Backoffice detectado em área pública. Redirecionando...");
             window.location.href = base + "backoffice/dashboard.html";
         }
@@ -352,44 +368,18 @@ async function checkoutCart() {
 
     const items = cartItems.map(i => ({ livro_id: parseInt(i.bookId) }));
     const payload = { items, user_id: parseInt(currentUser.id) };
-    console.log("Checkout payload:", JSON.stringify(payload));
-    console.log("currentUser:", currentUser);
 
-    try {
-        const response = await fetch(`${API_URL}/biblioteca/checkout`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+    const data = await apiFetch('biblioteca/checkout', {
+        method: 'POST',
+        body: payload
+    });
 
-        console.log("Checkout response status:", response.status);
-        const text = await response.text();
-        console.log("Checkout raw response:", text);
-
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.error("Failed to parse response:", text);
-            toast("Erro no servidor: " + text.substring(0, 100), "error");
-            return false;
-        }
-
-        if (data.sucesso) {
-            cartClear();
-            toast("Compra realizada com sucesso!");
-            return true;
-        } else {
-            toast(data.mensagem || "Erro ao finalizar compra", "error");
-            return false;
-        }
-    } catch (err) {
-        console.error("Checkout fetch error:", err);
-        toast("Erro de ligação ao servidor", "error");
+    if (data.sucesso) {
+        cartClear();
+        toast("Compra realizada com sucesso!");
+        return true;
+    } else {
+        toast(data.mensagem || "Erro ao finalizar compra", "error");
         return false;
     }
 }
@@ -408,6 +398,10 @@ async function login(email, password) {
         user.role = user.papel;
         user.name = user.nome_completo;
         localStorage.setItem("biblio_user", JSON.stringify(user));
+        // Guardar token para auth sem cookies
+        if (user.token) {
+            localStorage.setItem("biblio_token", user.token);
+        }
         currentUser = user;
         return currentUser;
     } else {
@@ -417,6 +411,10 @@ async function login(email, password) {
 }
 
 async function register(nome, email, password) {
+    localStorage.removeItem("biblio_user");
+    localStorage.removeItem("biblio_token");
+    currentUser = null;
+
     const data = await apiFetch('registo', {
         method: "POST",
         body: { nome, email, password }
@@ -429,6 +427,7 @@ async function register(nome, email, password) {
 
 function logout() {
     localStorage.removeItem("biblio_user");
+    localStorage.removeItem("biblio_token");
     const path = window.location.pathname;
     if (path.includes('/admin/') || path.includes('/backoffice/')) {
         location.href = "../login.html";

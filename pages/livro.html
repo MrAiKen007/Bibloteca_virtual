@@ -112,7 +112,7 @@
 
         try {
             const userId = currentUser ? (currentUser.id || currentUser.user_id) : '';
-            const url = `${API_URL}/livro?id=${livroId}${userId ? '&user_id=' + userId : ''}`;
+            const url = `${API_URL}/livro&id=${livroId}${userId ? '&user_id=' + userId : ''}`;
             const res = await fetch(url, { credentials: 'include' });
             if (!res.ok) { document.getElementById("main").innerHTML = `<div class="py-20 text-center"><h1 class="text-2xl">Livro não encontrado</h1></div>`; return; }
             const data = await res.json();
