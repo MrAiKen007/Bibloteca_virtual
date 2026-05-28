@@ -15,23 +15,25 @@ ini_set('display_errors', $isProduction ? 0 : 1);
 ini_set('display_startup_errors', $isProduction ? 0 : 1);
 error_reporting($isProduction ? 0 : E_ALL);
 
-// CORS Headers (com fallback para desenvolvimento local)
+// CORS Headers
 $allowedOrigins = [
     'https://mraiken007.github.io',
     'http://localhost',
     'http://127.0.0.1',
     'http://localhost:5500',
+    'http://127.0.0.1:5500',
     'http://localhost:3000'
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins)) {
+$originKnown = in_array($origin, $allowedOrigins);
+if ($originKnown) {
     header("Access-Control-Allow-Origin: $origin");
+    header("Access-Control-Allow-Credentials: true");
 } else {
     header("Access-Control-Allow-Origin: *");
 }
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-header("Access-Control-Allow-Credentials: true");
 
 // Lidar com pedidos OPTIONS (pre-flight)
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {

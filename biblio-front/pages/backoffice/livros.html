@@ -386,7 +386,7 @@ async function handleBookSubmit(e){
     formData.append('tags', JSON.stringify(selectedTags));
     formData.append('generos', JSON.stringify(selectedGenres));
     try {
-        const response = await fetch(`${API_URL}/livros/guardar`, { method: 'POST', body: formData, credentials: 'include' });
+        const response = await fetch(`${API_URL}?url=api/livros/guardar`, { method: 'POST', body: formData, credentials: 'include' });
         const result = await response.json();
         if (result.sucesso) { toast('Livro adicionado com sucesso!'); closeBookModal(); await fetchBooks(); render(); }
         else toast(result.mensagem || result.erro || 'Erro ao adicionar livro', 'error');

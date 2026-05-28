@@ -230,7 +230,7 @@ function render(){
 async function loadActivity(){
     const el = document.getElementById("activity-list");
     try {
-        const res = await fetch(`${API_URL}/auditoria`, { credentials: 'include' });
+        const res = await fetch(`${API_URL}?url=api/auditoria`, { credentials: 'include' });
         const data = await res.json();
         const logs = data.dados || [];
 

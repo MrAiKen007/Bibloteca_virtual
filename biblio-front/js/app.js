@@ -1,20 +1,21 @@
-const BASE_URL = "https://biblioipil.infinityfreeapp.com/index.php";
-const PROXY = "https://corsproxy.io/?";
+const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+const API_URL = isLocal
+    ? "http://127.0.0.1/dashboard/Bibloteca_virtual-1/biblioteca/index.php"
+    : "https://biblioipil.infinityfreeapp.com/index.php";
+const BASE_URL = API_URL;
 
 // --- WRAPPER GLOBAL DE API ---
 async function apiFetch(endpoint, options = {}) {
     const isPost = options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase());
     
     const token = localStorage.getItem('biblio_token');
-    let targetUrl = `${BASE_URL}?url=api/${endpoint}`;
-    if (token) targetUrl += `&token=${token}`;
-    
-    const url = `${PROXY}${encodeURIComponent(targetUrl)}`;
+    let url = `${BASE_URL}?url=api/${endpoint}`;
+    if (token && !isLocal) url += `&token=${token}`;
     
     const headers = {};
-    if (isPost) headers['Content-Type'] = 'text/plain';
+    if (isPost) headers['Content-Type'] = 'application/json';
     
-    const config = {};
+    const config = { credentials: isLocal ? 'include' : 'omit' };
     if (Object.keys(headers).length > 0) config.headers = headers;
     
     if (options.method) config.method = options.method;
@@ -83,6 +84,16 @@ function enforceRoleAccess() {
         return;
     }
 
+    // Se já estiver logado, redirecionar para fora das páginas de auth
+    if (isLoginPage) {
+        const role = (currentUser.role || currentUser.papel || "").toLowerCase();
+        const base = isInPages ? "./" : "./pages/";
+        if (role === 'admin') window.location.href = base + "admin/dashboard.html";
+        else if (role === 'backoffice') window.location.href = base + "backoffice/dashboard.html";
+        else window.location.href = base + "biblioteca.html";
+        return;
+    }
+
     // Normalização rigorosa
     const role = (currentUser.role || currentUser.papel || "").toLowerCase();
     console.log("Verificando acesso para role:", role, "em:", path);
@@ -90,12 +101,12 @@ function enforceRoleAccess() {
     const base = isInPages ? "./" : "./pages/";
 
     if (role === 'admin') {
-        if (!isAdminPath && !isLoginPage && !path.includes('dashboard.html')) {
+        if (!isAdminPath && !path.includes('dashboard.html')) {
             console.log("Admin detectado em área pública. Redirecionando...");
             window.location.href = base + "admin/dashboard.html";
         }
     } else if (role === 'backoffice') {
-        if (!isBackofficePath && !isLoginPage && !path.includes('dashboard.html')) {
+        if (!isBackofficePath && !path.includes('dashboard.html')) {
             console.log("Backoffice detectado em área pública. Redirecionando...");
             window.location.href = base + "backoffice/dashboard.html";
         }
@@ -411,6 +422,10 @@ async function login(email, password) {
 }
 
 async function register(nome, email, password) {
+    localStorage.removeItem("biblio_user");
+    localStorage.removeItem("biblio_token");
+    currentUser = null;
+
     const data = await apiFetch('registo', {
         method: "POST",
         body: { nome, email, password }

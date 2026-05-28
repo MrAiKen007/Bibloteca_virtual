@@ -31,7 +31,16 @@ biblioteca/public/test_*.php
 biblioteca/public/importar_db.php
 biblioteca/public/verificar_admin.php
 biblioteca/testes/
+biblioteca/tests/
 biblioteca/gerar_hash.php
+biblioteca/check_deploy.php
+biblioteca/debug_input.php
+biblioteca/database/dump_producao/gerar_dump.php
+
+# --------------------------------------------
+# Token Files (runtime auth)
+# --------------------------------------------
+biblioteca/tokens/
 
 # --------------------------------------------
 # Environment Files

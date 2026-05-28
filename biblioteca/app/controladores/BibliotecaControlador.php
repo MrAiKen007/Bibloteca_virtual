@@ -77,8 +77,12 @@ class BibliotecaControlador
         $baseUrl = $this->getBaseUrl();
 
         foreach ($livros as &$livro) {
-            $livro['cover'] = (isset($livro['url_imagem_capa']) && $livro['url_imagem_capa'])
-                ? $baseUrl . $livro['url_imagem_capa']
+            $capa = $livro['url_imagem_capa'] ?? null;
+            if ($capa && strpos($capa, 'public/') !== 0) {
+                $capa = 'public/' . $capa;
+            }
+            $livro['cover'] = $capa
+                ? $baseUrl . $capa
                 : 'https://picsum.photos/seed/book' . ($livro['id'] ?? 0) . '/400/600';
             $livro['price'] = (float)($livro['preco'] ?? 0);
             $livro['pdf_url'] = (isset($livro['caminho_pdf']) && $livro['caminho_pdf'])

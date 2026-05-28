@@ -47,7 +47,7 @@ async function loadReader(){
     if (!id) { showError("Livro não especificado"); return; }
 
     try {
-        const res = await fetch(`${API_URL}/livro?id=${id}`, { credentials: 'include' });
+        const res = await fetch(`${API_URL}?url=api/livro&id=${id}`, { credentials: 'include' });
         if (!res.ok) { showError("Livro não encontrado"); return; }
         const data = await res.json();
         const book = data.dados;
@@ -59,7 +59,7 @@ async function loadReader(){
             return;
         }
 
-        const pdfUrl = `${API_URL}/livro/pdf?id=${id}`;
+        const pdfUrl = `${API_URL}?url=api/livro/pdf&id=${id}`;
         document.getElementById("reader-body").innerHTML = `<iframe src="${pdfUrl}" title="${book.titulo}" allowfullscreen></iframe>`;
     } catch (err) {
         showError("Erro ao carregar o livro. Verifique a sua ligação.");

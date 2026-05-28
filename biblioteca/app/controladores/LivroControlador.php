@@ -64,7 +64,7 @@ class LivroControlador
         $capaPath = null;
 
         if (!empty($_FILES['capa']['name'])) {
-            $pasta = __DIR__ . '/../public/uploads/capas/';
+            $pasta = __DIR__ . '/../../public/uploads/capas/';
 
             if (!is_dir($pasta)) {
                 mkdir($pasta, 0755, true);
@@ -96,7 +96,7 @@ class LivroControlador
                 exit;
             }
 
-            $capaPath = $caminho;
+            $capaPath = 'public/uploads/capas/' . $nome;
         }
 
         /*
@@ -107,7 +107,7 @@ class LivroControlador
         $pdfPath = null;
 
         if (!empty($_FILES['pdf']['name'])) {
-            $pasta = __DIR__ . '/../public/uploads/pdfs/';
+            $pasta = __DIR__ . '/../../public/uploads/pdfs/';
 
             if (!is_dir($pasta)) {
                 mkdir($pasta, 0755, true);
@@ -137,7 +137,7 @@ class LivroControlador
                 exit;
             }
 
-            $pdfPath = $caminhoPdf;
+            $pdfPath = 'public/uploads/pdfs/' . $nomePdf;
         }
 
         if (
@@ -227,7 +227,7 @@ class LivroControlador
 
         $capaPath = $livroExistente['url_imagem_capa'];
         if (!empty($_FILES['capa']['name'])) {
-            $pasta = __DIR__ . '/../public/uploads/capas/';
+            $pasta = __DIR__ . '/../../public/uploads/capas/';
             if (!is_dir($pasta)) {
                 mkdir($pasta, 0755, true);
             }
@@ -246,7 +246,7 @@ class LivroControlador
                 header("Location: index.php?url=livros/editar&id=$id");
                 exit;
             }
-            $capaPath = $caminho;
+            $capaPath = 'public/uploads/capas/' . $nome;
         }
 
         $dados = [
@@ -303,8 +303,12 @@ class LivroControlador
         $db = BaseDados::getInstancia()->getConexao();
 
         foreach ($livros as &$livro) {
-            $livro['cover'] = (isset($livro['url_imagem_capa']) && $livro['url_imagem_capa'])
-                ? $baseUrl . $livro['url_imagem_capa']
+            $capa = $livro['url_imagem_capa'] ?? null;
+            if ($capa && strpos($capa, 'public/') !== 0) {
+                $capa = 'public/' . $capa;
+            }
+            $livro['cover'] = $capa
+                ? $baseUrl . $capa
                 : 'https://picsum.photos/seed/book' . ($livro['id'] ?? 0) . '/400/600';
             $livro['price'] = (float)($livro['preco'] ?? 0);
             $livro['pdf_url'] = (isset($livro['caminho_pdf']) && $livro['caminho_pdf'])
@@ -349,7 +353,7 @@ class LivroControlador
 
             $capaPath = null;
             if (!empty($_FILES['capa']['name'])) {
-                $pasta = __DIR__ . '/../public/uploads/capas/';
+                $pasta = __DIR__ . '/../../public/uploads/capas/';
                 if (!is_dir($pasta)) { mkdir($pasta, 0755, true); }
 
                 $maxSize = 5 * 1024 * 1024;
@@ -369,12 +373,12 @@ class LivroControlador
                 if (!move_uploaded_file($_FILES['capa']['tmp_name'], $caminho)) {
                     Resposta::erro("Falha ao enviar a imagem.");
                 }
-                $capaPath = 'uploads/capas/' . $nome;
+                $capaPath = 'public/uploads/capas/' . $nome;
             }
 
             $pdfPath = null;
             if (!empty($_FILES['pdf']['name'])) {
-                $pastaPdf = __DIR__ . '/../public/uploads/pdfs/';
+                $pastaPdf = __DIR__ . '/../../public/uploads/pdfs/';
                 if (!is_dir($pastaPdf)) { mkdir($pastaPdf, 0755, true); }
 
                 $maxSize = 50 * 1024 * 1024;
@@ -392,7 +396,7 @@ class LivroControlador
                 if (!move_uploaded_file($_FILES['pdf']['tmp_name'], $caminhoPdf)) {
                     Resposta::erro("Falha ao enviar o PDF.");
                 }
-                $pdfPath = 'uploads/pdfs/' . $nomePdf;
+                $pdfPath = 'public/uploads/pdfs/' . $nomePdf;
             }
 
             $tagsRaw = $_POST['tags'] ?? '[]';
@@ -504,7 +508,7 @@ class LivroControlador
 
         if ($isMultipart) {
             if (!empty($_FILES['capa']['name'])) {
-                $pasta = __DIR__ . '/../public/uploads/capas/';
+                $pasta = __DIR__ . '/../../public/uploads/capas/';
                 if (!is_dir($pasta)) { mkdir($pasta, 0755, true); }
                 $maxSize = 5 * 1024 * 1024;
                 if ($_FILES['capa']['size'] > $maxSize) {
@@ -521,11 +525,11 @@ class LivroControlador
                 if (!move_uploaded_file($_FILES['capa']['tmp_name'], $caminho)) {
                     Resposta::erro("Falha ao enviar a imagem.");
                 }
-                $capaPath = 'uploads/capas/' . $nome;
+                $capaPath = 'public/uploads/capas/' . $nome;
             }
 
             if (!empty($_FILES['pdf']['name'])) {
-                $pastaPdf = __DIR__ . '/../public/uploads/pdfs/';
+                $pastaPdf = __DIR__ . '/../../public/uploads/pdfs/';
                 if (!is_dir($pastaPdf)) { mkdir($pastaPdf, 0755, true); }
                 $maxSize = 50 * 1024 * 1024;
                 if ($_FILES['pdf']['size'] > $maxSize) {
@@ -540,7 +544,7 @@ class LivroControlador
                 if (!move_uploaded_file($_FILES['pdf']['tmp_name'], $caminhoPdf)) {
                     Resposta::erro("Falha ao enviar o PDF.");
                 }
-                $pdfPath = 'uploads/pdfs/' . $nomePdf;
+                $pdfPath = 'public/uploads/pdfs/' . $nomePdf;
             }
 
             $dados = [
@@ -595,8 +599,12 @@ class LivroControlador
         if (!$livro) Resposta::erro("Livro não encontrado", 404);
 
         $baseUrl = $this->getBaseUrl();
-        $livro['cover'] = (isset($livro['url_imagem_capa']) && $livro['url_imagem_capa'])
-            ? $baseUrl . $livro['url_imagem_capa']
+        $capa = $livro['url_imagem_capa'] ?? null;
+        if ($capa && strpos($capa, 'public/') !== 0) {
+            $capa = 'public/' . $capa;
+        }
+        $livro['cover'] = $capa
+            ? $baseUrl . $capa
             : 'https://picsum.photos/seed/book' . ($livro['id'] ?? 0) . '/400/600';
         $livro['price'] = (float)($livro['preco'] ?? 0);
         $livro['pdf_url'] = (isset($livro['caminho_pdf']) && $livro['caminho_pdf'])
@@ -687,8 +695,12 @@ class LivroControlador
             Resposta::erro("PDF não disponível para este livro", 404);
         }
 
-        $pdfFile = realpath(__DIR__ . '/../public/' . $livro['caminho_pdf']);
-        $uploadsDir = realpath(__DIR__ . '/../public/uploads/pdfs');
+        $pdfRelative = $livro['caminho_pdf'];
+        if (strpos($pdfRelative, 'public/') !== 0) {
+            $pdfRelative = 'public/' . $pdfRelative;
+        }
+        $pdfFile = realpath(__DIR__ . '/../../' . $pdfRelative);
+        $uploadsDir = realpath(__DIR__ . '/../../public/uploads/pdfs');
         if ($pdfFile === false || strpos($pdfFile, $uploadsDir) !== 0) {
             Resposta::erro("Ficheiro PDF inválido.", 403);
         }
