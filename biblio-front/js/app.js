@@ -10,9 +10,9 @@ async function apiFetch(endpoint, options = {}) {
     
     const token = localStorage.getItem('biblio_token');
     let url = `${BASE_URL}?url=api/${endpoint}`;
-    if (token && !isLocal) url += `&token=${token}`;
     
     const headers = {};
+    if (token && !isLocal) headers['Authorization'] = `Bearer ${token}`;
     if (isPost) headers['Content-Type'] = 'application/json';
     
     const config = { credentials: 'include' };
